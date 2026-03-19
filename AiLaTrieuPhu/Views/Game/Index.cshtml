@@ -1,0 +1,10 @@
+﻿@model AiLaTrieuPhu.Models.Question
+
+<h2>@Model.Content</h2>
+
+<form method="post" action="/Game/EndGame">
+    <button name="answer" value="A">@Model.A</button>
+    <button name="answer" value="B">@Model.B</button>
+    <button name="answer" value="C">@Model.C</button>
+    <button name="answer" value="D">@Model.D</button>
+</form>

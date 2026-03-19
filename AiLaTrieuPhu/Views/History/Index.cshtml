@@ -1,0 +1,24 @@
+﻿@model List<AiLaTrieuPhu.Models.Game>
+
+<h2>Lịch sử chơi</h2>
+
+<table class="table">
+    <tr>
+        <th>Ngày</th>
+        <th>Điểm</th>
+        <th>Level</th>
+        <th>Thời gian</th>
+        <th>Tiền</th>
+    </tr>
+
+    @foreach (var g in Model)
+    {
+        <tr>
+            <td>@g.CreatedAt</td>
+            <td>@g.Score</td>
+            <td>@g.LevelReached</td>
+            <td>@g.TotalTime</td>
+            <td>@g.Money</td>
+        </tr>
+    }
+</table>

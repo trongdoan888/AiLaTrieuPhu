@@ -1,0 +1,13 @@
+﻿<h3>Câu hỏi level @ViewBag.Level</h3>
+
+<form method="post" action="/Game/Answer">
+    <input type="hidden" name="questionId" value="@Model.Id" />
+    <input type="hidden" name="level" value="@ViewBag.Level" />
+
+    <p>@Model.Content</p>
+
+    <button name="answer" value="A">@Model.A</button>
+    <button name="answer" value="B">@Model.B</button>
+    <button name="answer" value="C">@Model.C</button>
+    <button name="answer" value="D">@Model.D</button>
+</form>
