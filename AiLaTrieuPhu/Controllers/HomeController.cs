@@ -1,13 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
-using AiLaTrieuPhu.Models;
-using AiLaTrieuPhu.Data;
-public class HomeController : Controller
-{
-    public IActionResult Index()
-    {
-        if (HttpContext.Session.GetInt32("UserId") == null)
-            return RedirectToAction("Login", "Account");
+using Microsoft.AspNetCore.Http; // Bắt buộc để dùng Session
 
-        return View();
+namespace AiLaTrieuPhu.Controllers
+{
+    public class HomeController : Controller
+    {
+        public IActionResult Index()
+        {
+            // Kiểm tra nếu chưa đăng nhập thì đẩy về trang Login
+            if (HttpContext.Session.GetInt32("UserId") == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            return View();
+        }
+
+        // Thêm hàm này để hiển thị trang Luật chơi / Giới thiệu
+        public IActionResult About()
+        {
+            return View();
+        }
     }
 }

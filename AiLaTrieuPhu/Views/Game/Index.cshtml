@@ -1,10 +1,62 @@
 ﻿@model AiLaTrieuPhu.Models.Question
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đang chơi - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/game.css" asp-append-version="true" />
+</head>
+<body>
 
-<h2>@Model.Content</h2>
+    <div class="top-bar">
+        <a href="/Home/Index" class="btn-quit" onclick="return confirm('Bạn muốn dừng cuộc chơi và bảo toàn số tiền?');"><i class="fas fa-sign-out-alt"></i> Dừng chơi</a>
+        
+        <div class="timer-box" id="timer">60</div>
+        
+        <div class="level-info">
+            Câu: @(Model?.Level ?? 1) / 15 <br />
+            <span style="font-size: 16px; color: #fff;">Điểm: @(ViewBag.Score ?? 0) | Tiền: @(ViewBag.Money ?? 0) VNĐ</span>
+        </div>
+    </div>
 
-<form method="post" action="/Game/EndGame">
-    <button name="answer" value="A">@Model.A</button>
-    <button name="answer" value="B">@Model.B</button>
-    <button name="answer" value="C">@Model.C</button>
-    <button name="answer" value="D">@Model.D</button>
-</form>
+    <div class="lifelines">
+        <button class="lifeline-btn" title="50/50" id="btn5050"><i class="fas fa-star-half-alt"></i></button>
+        <button class="lifeline-btn" title="Gọi điện thoại" id="btnCall"><i class="fas fa-phone-alt"></i></button>
+        <button class="lifeline-btn" title="Hỏi ý kiến khán giả" id="btnAudience"><i class="fas fa-users"></i></button>
+    </div>
+
+    <div class="game-board">
+        <div class="question-box">
+            @(Model?.Content ?? "Đang tải câu hỏi...")
+        </div>
+
+        <form method="post" action="/Game/CheckAnswer" id="answerForm">
+            <input type="hidden" name="questionId" value="@Model.Id" />
+            <input type="hidden" name="timeUsed" id="timeUsed" value="0" />
+            <input type="hidden" id="correctAnswer" value="@Model.CorrectAnswer" />
+
+            <div class="answers-grid">
+                <button type="button" class="answer-btn" value="A">
+                    <span class="letter">A:</span> @(Model?.A ?? "Đáp án A")
+                </button>
+                <button type="button" class="answer-btn" value="B">
+                    <span class="letter">B:</span> @(Model?.B ?? "Đáp án B")
+                </button>
+                <button type="button" class="answer-btn" value="C">
+                    <span class="letter">C:</span> @(Model?.C ?? "Đáp án C")
+                </button>
+                <button type="button" class="answer-btn" value="D">
+                    <span class="letter">D:</span> @(Model?.D ?? "Đáp án D")
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="~/js/game.js" asp-append-version="true"></script>
+</body>
+</html>

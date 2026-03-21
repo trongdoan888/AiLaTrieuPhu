@@ -8,7 +8,9 @@
         public int LevelReached { get; set; }
         public int TotalTime { get; set; }
         public long Money { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Sửa DateTime.Now thành DateTime.UtcNow
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public User? User { get; set; }
         public ICollection<GameDetail>? Details { get; set; }

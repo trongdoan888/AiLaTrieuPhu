@@ -1,24 +1,75 @@
-﻿@model List<AiLaTrieuPhu.Models.Game>
-
-<h2>Lịch sử chơi</h2>
-
-<table class="table">
-    <tr>
-        <th>Ngày</th>
-        <th>Điểm</th>
-        <th>Level</th>
-        <th>Thời gian</th>
-        <th>Tiền</th>
-    </tr>
-
-    @foreach (var g in Model)
-    {
-        <tr>
-            <td>@g.CreatedAt</td>
-            <td>@g.Score</td>
-            <td>@g.LevelReached</td>
-            <td>@g.TotalTime</td>
-            <td>@g.Money</td>
-        </tr>
-    }
-</table>
+﻿@model IEnumerable<AiLaTrieuPhu.Models.Game>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lịch sử chơi - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body {
+            margin: 0; padding: 20px; min-height: 100vh;
+            background: radial-gradient(circle at top, #0a1f44 0%, #020813 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
+        }
+        .btn-home {
+            position: absolute; top: 20px; left: 20px; padding: 10px 20px; text-decoration: none;
+            background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #00d4ff;
+            border-radius: 20px; transition: 0.3s; font-weight: bold;
+        }
+        .btn-home:hover { background: #00d4ff; color: black; box-shadow: 0 0 10px #00d4ff; }
+        .container { max-width: 900px; margin: 60px auto 0; text-align: center; }
+        h1 { color: #ffcc00; font-size: 36px; text-transform: uppercase; text-shadow: 0 0 10px #ffcc00; margin-bottom: 30px; }
+        .history-table {
+            width: 100%; border-collapse: collapse; background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px; overflow: hidden; border: 1px solid #00d4ff;
+        }
+        .history-table th, .history-table td { padding: 15px; border-bottom: 1px solid rgba(0, 212, 255, 0.2); }
+        .history-table th { background: rgba(0, 212, 255, 0.2); color: #00d4ff; text-transform: uppercase; }
+        .history-table tr:hover { background: rgba(0, 212, 255, 0.1); }
+        .money-col { color: #ffcc00; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <a href="/Home/Index" class="btn-home"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
+    
+    <div class="container">
+        <h1>Hồ Sơ Cá Nhân</h1>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Ngày chơi</th>
+                    <th>Số câu vượt qua</th>
+                    <th>Điểm số</th>
+                    <th>Thời gian</th>
+                    <th>Tiền thưởng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var game in Model)
+                    {
+                        <tr>
+                            <td>@game.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@game.LevelReached / 15</td>
+                            <td>@game.Score</td>
+                            <td>@game.TotalTime giây</td>
+                            <td class="money-col">@String.Format("{0:N0}", game.Money) VNĐ</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 30px;">Bạn chưa tham gia lượt chơi nào. Hãy thử sức ngay!</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

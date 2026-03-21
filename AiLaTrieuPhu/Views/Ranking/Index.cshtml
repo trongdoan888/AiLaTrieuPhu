@@ -1,22 +1,75 @@
-﻿@model List<AiLaTrieuPhu.Models.Ranking>
-
-<h2>Bảng xếp hạng</h2>
-
-<table class="table">
-    <tr>
-        <th>Top</th>
-        <th>User</th>
-        <th>Điểm</th>
-        <th>Thời gian</th>
-    </tr>
-
-    @for (int i = 0; i < Model.Count; i++)
-    {
-        <tr>
-            <td>@(i + 1)</td>
-            <td>@Model[i].User?.Username</td>
-            <td>@Model[i].Score</td>
-            <td>@Model[i].TimePlayed</td>
-        </tr>
-    }
-</table>
+﻿@model IEnumerable<AiLaTrieuPhu.Models.Ranking>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bảng Xếp Hạng - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body {
+            margin: 0; padding: 20px; min-height: 100vh;
+            background: radial-gradient(circle at top, #0a1f44 0%, #020813 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
+        }
+        .btn-home {
+            position: absolute; top: 20px; left: 20px; padding: 10px 20px; text-decoration: none;
+            background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #00d4ff;
+            border-radius: 20px; transition: 0.3s; font-weight: bold;
+        }
+        .btn-home:hover { background: #00d4ff; color: black; box-shadow: 0 0 10px #00d4ff; }
+        .container { max-width: 800px; margin: 60px auto 0; text-align: center; }
+        h1 { color: #ffcc00; font-size: 36px; text-transform: uppercase; text-shadow: 0 0 10px #ffcc00; margin-bottom: 30px; }
+        .rank-table {
+            width: 100%; border-collapse: collapse; background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px; overflow: hidden; border: 1px solid #ffcc00;
+        }
+        .rank-table th, .rank-table td { padding: 15px; border-bottom: 1px solid rgba(255, 204, 0, 0.2); }
+        .rank-table th { background: rgba(255, 204, 0, 0.2); color: #ffcc00; text-transform: uppercase; }
+        /* Tô màu Top 3 */
+        .rank-table tr:nth-child(1) td { color: #ffcc00; font-size: 20px; font-weight: bold; background: rgba(255, 215, 0, 0.1); }
+        .rank-table tr:nth-child(2) td { color: #c0c0c0; font-size: 18px; font-weight: bold; background: rgba(192, 192, 192, 0.1); }
+        .rank-table tr:nth-child(3) td { color: #cd7f32; font-size: 18px; font-weight: bold; background: rgba(205, 127, 50, 0.1); }
+    </style>
+</head>
+<body>
+    <a href="/Home/Index" class="btn-home"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
+    
+    <div class="container">
+        <h1><i class="fas fa-trophy"></i> Bảng Vàng Triệu Phú</h1>
+        <table class="rank-table">
+            <thead>
+                <tr>
+                    <th>Hạng</th>
+                    <th>Người chơi</th>
+                    <th>Điểm số</th>
+                    <th>Tổng thời gian</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int rank = 1; }
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>#@rank</td>
+                            <td>@(item.User?.Username ?? "Ẩn danh")</td>
+                            <td>@item.Score</td>
+                            <td>@item.TimePlayed giây</td>
+                        </tr>
+                        rank++;
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="4">Chưa có ai ghi danh lên bảng vàng.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

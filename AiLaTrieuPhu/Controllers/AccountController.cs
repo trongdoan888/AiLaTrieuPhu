@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AiLaTrieuPhu.Data;
 using AiLaTrieuPhu.Models;
+using BCrypt.Net;
 using System.Linq;
 
 public class AccountController : Controller

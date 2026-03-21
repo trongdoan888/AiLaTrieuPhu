@@ -1,0 +1,69 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luật Chơi - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body {
+            margin: 0; padding: 20px; min-height: 100vh;
+            background: radial-gradient(circle at top, #0a1f44 0%, #020813 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
+        }
+        .btn-home {
+            position: absolute; top: 20px; left: 20px; padding: 10px 20px; text-decoration: none;
+            background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #00d4ff;
+            border-radius: 20px; transition: 0.3s; font-weight: bold;
+        }
+        .btn-home:hover { background: #00d4ff; color: black; box-shadow: 0 0 10px #00d4ff; }
+        
+        .container { max-width: 800px; margin: 60px auto 0; background: rgba(0,0,0,0.6); border: 2px solid #00d4ff; border-radius: 20px; padding: 40px; box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+        h1 { color: #ffcc00; text-align: center; text-transform: uppercase; margin-top: 0; margin-bottom: 30px; font-size: 32px; text-shadow: 0 0 10px #ffcc00; }
+        
+        .rule-section { margin-bottom: 25px; }
+        .rule-section h3 { color: #00d4ff; border-bottom: 1px solid #00d4ff; padding-bottom: 10px; }
+        .rule-section ul { line-height: 1.8; font-size: 16px; padding-left: 20px; }
+        .rule-section li { margin-bottom: 10px; }
+        .highlight { color: #ffcc00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="/Home/Index" class="btn-home"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
+    
+    <div class="container">
+        <h1>Luật Chơi Của Chương Trình</h1>
+        
+        <div class="rule-section">
+            <h3><i class="fas fa-list-ol"></i> Thể thức cơ bản</h3>
+            <ul>
+                <li>Người chơi phải vượt qua <span class="highlight">15 câu hỏi</span> trắc nghiệm khách quan.</li>
+                <li>Mỗi câu hỏi có 4 phương án trả lời (A, B, C, D) và chỉ có <span class="highlight">1 phương án đúng duy nhất</span>.</li>
+                <li>Bạn có tối đa <span class="highlight">60 giây</span> để suy nghĩ và đưa ra đáp án cho mỗi câu. Trả lời sai hoặc hết giờ, trò chơi sẽ kết thúc.</li>
+            </ul>
+        </div>
+
+        <div class="rule-section">
+            <h3><i class="fas fa-money-bill-wave"></i> Điểm và Tiền thưởng</h3>
+            <ul>
+                <li>Mỗi câu trả lời đúng, bạn sẽ được cộng thêm <span class="highlight">200 điểm</span>.</li>
+                <li>Vượt qua 15 câu hỏi, bạn sẽ giành giải thưởng cao nhất trị giá <span class="highlight">150.000.000 VNĐ</span>.</li>
+                <li>Nếu trả lời sai, bạn sẽ ra về với phần thưởng là <span class="highlight">0 VNĐ</span> (Trừ khi bạn chọn "Dừng chơi" trước khi xem đáp án).</li>
+            </ul>
+        </div>
+
+        <div class="rule-section">
+            <h3><i class="fas fa-life-ring"></i> Các quyền trợ giúp</h3>
+            <ul>
+                <li><strong>50/50:</strong> Máy tính sẽ loại bỏ đi 2 phương án sai.</li>
+                <li><strong>Gọi điện thoại cho người thân:</strong> Nhận gợi ý đáp án trực tiếp từ bạn bè.</li>
+                <li><strong>Hỏi ý kiến khán giả trong trường quay:</strong> Xem biểu đồ bình chọn của khán giả để đưa ra quyết định.</li>
+                <li>Mỗi quyền trợ giúp chỉ được sử dụng <span class="highlight">duy nhất 1 lần</span> trong suốt quá trình chơi.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

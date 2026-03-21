@@ -1,0 +1,104 @@
+﻿/* Nền tối sâu thẳm như trường quay */
+.millionaire-bg {
+    background: radial-gradient(circle, #102a4d 0%, #020b1a 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.login-card {
+    background: rgba(2, 15, 30, 0.9);
+    border: 2px solid #00d4ff;
+    border-radius: 20px;
+    padding: 40px;
+    width: 380px;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    text-align: center;
+}
+
+/* Logo phong cách game */
+.game-logo h2 {
+    color: #fff;
+    text-shadow: 0 0 10px #00d4ff;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+.logo-circle {
+    width: 60px;
+    height: 60px;
+    border: 3px solid #ffcc00;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    color: #ffcc00;
+    box-shadow: 0 0 15px #ffcc00;
+}
+
+/* Input phong cách hiện đại */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+    .input-group input {
+        width: 100%;
+        background: #051933;
+        border: 1px solid #1a4a8a;
+        padding: 12px 15px;
+        color: white;
+        border-radius: 5px;
+        outline: none;
+        transition: 0.3s;
+    }
+
+        .input-group input:focus {
+            border-color: #00d4ff;
+        }
+
+/* Nút bấm hình chữ nhật vát góc (giống khung câu trả lời) */
+.btn-confirm {
+    width: 100%;
+    background: linear-gradient(180deg, #1a4a8a 0%, #051933 100%);
+    border: 2px solid #ffcc00;
+    color: #ffcc00;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+    .btn-confirm:hover {
+        background: #ffcc00;
+        color: #051933;
+        box-shadow: 0 0 20px #ffcc00;
+    }
+
+.action-links a {
+    color: #888;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 15px;
+    display: inline-block;
+}
+
+    .action-links a:hover {
+        color: #00d4ff;
+    }
+
+/* Thông báo lỗi */
+.error-msg {
+    margin-top: 20px;
+    color: #ff4444;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px dashed #ff4444;
+}
