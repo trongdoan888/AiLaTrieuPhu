@@ -42,7 +42,7 @@
             <thead>
                 <tr>
                     <th>Ngày chơi</th>
-                    <th>Số câu vượt qua</th>
+                    <th>Level đạt được</th>
                     <th>Điểm số</th>
                     <th>Thời gian</th>
                     <th>Tiền thưởng</th>
@@ -55,7 +55,22 @@
                     {
                         <tr>
                             <td>@game.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@game.LevelReached / 15</td>
+                            
+                            <td>
+                                @if (game.LevelReached == 15)
+                                {
+                                    <span style="color: #ffcc00; font-weight: bold;"><i class="fas fa-crown"></i> Phá đảo 15 Level!</span>
+                                }
+                                else if (game.LevelReached == 0)
+                                {
+                                    <span style="color: #ff4d4d; font-weight: bold;">Chưa qua Level 1</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #00ffcc; font-weight: bold;">Hoàn thành Level @game.LevelReached</span>
+                                }
+                            </td>
+                            
                             <td>@game.Score</td>
                             <td>@game.TotalTime giây</td>
                             <td class="money-col">@String.Format("{0:N0}", game.Money) VNĐ</td>

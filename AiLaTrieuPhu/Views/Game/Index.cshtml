@@ -1,6 +1,8 @@
 ﻿@model AiLaTrieuPhu.Models.Question
 @{
     Layout = null;
+    // Lấy số Câu/Level hiện tại (từ 1 đến 15)
+    int currentLevel = ViewBag.CurrentLevel ?? 1;
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -10,24 +12,78 @@
     <title>Đang chơi - Ai Là Triệu Phú</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/game.css" asp-append-version="true" />
+    <style>
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 30px; background: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #00d4ff; box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .level-info-container {
+            text-align: right; background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1));
+            padding: 10px 20px; border-radius: 15px; border-right: 3px solid #ffcc00;
+        }
+        .badge-level {
+            font-size: 24px; font-weight: bold; color: #ffcc00;
+            text-transform: uppercase; text-shadow: 0 0 10px #ffcc00; letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .badge-money {
+            font-size: 16px; color: #fff; font-weight: bold;
+        }
+        .badge-money span { color: #00ffcc; text-shadow: 0 0 5px #00ffcc; }
+
+        .btn-sound {
+            background: transparent; border: 2px solid #00d4ff; color: #00d4ff;
+            border-radius: 50%; width: 45px; height: 45px; cursor: pointer;
+            font-size: 18px; transition: 0.3s; margin-left: 15px;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        .btn-sound:hover { background: #00d4ff; color: #000; box-shadow: 0 0 20px #00d4ff; }
+        .btn-sound.muted { border-color: #ff4d4d; color: #ff4d4d; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); }
+        
+        .question-box {
+            animation: pulse-border 2s infinite alternate;
+        }
+        @@keyframes pulse-border {
+            from { box-shadow: 0 0 10px #00d4ff; }
+            to { box-shadow: 0 0 25px #00d4ff, inset 0 0 10px rgba(0,212,255,0.2); }
+        }
+    </style>
 </head>
 <body>
 
+    <audio id="bgMusic" loop>
+        <source src="/audio/bg-music.mp3" type="audio/mpeg">
+    </audio>
+
     <div class="top-bar">
-        <a href="/Home/Index" class="btn-quit" onclick="return confirm('Bạn muốn dừng cuộc chơi và bảo toàn số tiền?');"><i class="fas fa-sign-out-alt"></i> Dừng chơi</a>
+        <div style="display: flex; align-items: center;">
+            <a href="#" class="btn-quit" id="btnQuitGame"><i class="fas fa-sign-out-alt"></i> Dừng chơi</a>
+            <button id="btnToggleSound" class="btn-sound" title="Bật/Tắt Nhạc"><i class="fas fa-volume-up"></i></button>
+        </div>
         
         <div class="timer-box" id="timer">60</div>
         
-        <div class="level-info">
-            Câu: @(Model?.Level ?? 1) / 15 <br />
-            <span style="font-size: 16px; color: #fff;">Điểm: @(ViewBag.Score ?? 0) | Tiền: @(ViewBag.Money ?? 0) VNĐ</span>
+        <div class="level-info-container">
+            <div class="badge-level">CÂU @currentLevel / 15</div>
+            <div class="badge-money">
+                <i class="fas fa-star" style="color: #ffcc00;"></i> Điểm: @(ViewBag.Score ?? 0) &nbsp;|&nbsp; 
+                <i class="fas fa-money-bill-wave" style="color: #00ffcc;"></i> Tiền: <span>@(String.Format("{0:N0}", ViewBag.Money ?? 0)) VNĐ</span>
+            </div>
         </div>
     </div>
 
     <div class="lifelines">
-        <button class="lifeline-btn" title="50/50" id="btn5050"><i class="fas fa-star-half-alt"></i></button>
-        <button class="lifeline-btn" title="Gọi điện thoại" id="btnCall"><i class="fas fa-phone-alt"></i></button>
-        <button class="lifeline-btn" title="Hỏi ý kiến khán giả" id="btnAudience"><i class="fas fa-users"></i></button>
+        <button class="lifeline-btn @(ViewBag.Used5050 ? "used" : "")" title="50/50" id="btn5050">
+            <i class="fas fa-star-half-alt"></i>
+        </button>
+        <button class="lifeline-btn @(ViewBag.UsedCall ? "used" : "")" title="Gọi điện thoại" id="btnCall">
+            <i class="fas fa-phone-alt"></i>
+        </button>
+        <button class="lifeline-btn @(ViewBag.UsedAudience ? "used" : "")" title="Hỏi ý kiến khán giả" id="btnAudience">
+            <i class="fas fa-users"></i>
+        </button>
     </div>
 
     <div class="game-board">
@@ -57,6 +113,44 @@
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/game.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const bgMusic = document.getElementById("bgMusic");
+            const btnToggleSound = document.getElementById("btnToggleSound");
+            const iconSound = btnToggleSound.querySelector("i");
+            
+            let isMusicPlaying = false;
+
+            function playMusic() {
+                bgMusic.volume = 0.4; 
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    iconSound.className = "fas fa-volume-up";
+                    btnToggleSound.classList.remove("muted");
+                }).catch(err => console.log("Trình duyệt chặn autoplay"));
+            }
+
+            document.body.addEventListener('click', function() {
+                if (!isMusicPlaying && bgMusic.paused) {
+                    playMusic();
+                }
+            }, { once: true });
+
+            btnToggleSound.addEventListener("click", function(e) {
+                e.stopPropagation(); 
+                if (bgMusic.paused) {
+                    playMusic();
+                } else {
+                    bgMusic.pause();
+                    isMusicPlaying = false;
+                    iconSound.className = "fas fa-volume-mute";
+                    btnToggleSound.classList.add("muted");
+                }
+            });
+        });
+    </script>
 </body>
 </html>

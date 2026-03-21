@@ -1,9 +1,6 @@
 ﻿@{
-    Layout = null; // Bỏ Layout mặc định
-    // Lấy ID người chơi đang đăng nhập từ Session để gán vào link Lịch sử
-    var currentUserId = Context.Session.GetInt32("UserId");
+    Layout = null; 
 }
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -132,7 +129,7 @@
             <a href="/Home/About" class="btn-menu"><i class="fas fa-info-circle"></i> Giới Thiệu</a>
             <a href="/Ranking/Index" class="btn-menu"><i class="fas fa-trophy"></i> Bảng Xếp Hạng</a>
             
-            <a href="/History/Index?userId=@currentUserId" class="btn-menu"><i class="fas fa-history"></i> Lịch Sử Chơi</a>
+            <a href="/History/Index?userId=@ViewBag.UserId" class="btn-menu"><i class="fas fa-history"></i> Lịch Sử Chơi</a>
             
             <a href="/Account/Logout" class="btn-menu btn-logout" onclick="return confirm('Bạn có chắc chắn muốn rời khỏi trường quay không?');"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
         </div>

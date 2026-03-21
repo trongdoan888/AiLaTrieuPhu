@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http; // Bắt buộc để dùng Session
+using Microsoft.AspNetCore.Http;
 
 namespace AiLaTrieuPhu.Controllers
 {
@@ -7,16 +7,21 @@ namespace AiLaTrieuPhu.Controllers
     {
         public IActionResult Index()
         {
-            // Kiểm tra nếu chưa đăng nhập thì đẩy về trang Login
-            if (HttpContext.Session.GetInt32("UserId") == null)
+            // Lấy ID người dùng từ Session
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            // Nếu chưa đăng nhập, đá về trang Login
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
+            // Truyền ID sang View thông qua ViewBag cực kỳ an toàn
+            ViewBag.UserId = userId;
+
             return View();
         }
 
-        // Thêm hàm này để hiển thị trang Luật chơi / Giới thiệu
         public IActionResult About()
         {
             return View();
