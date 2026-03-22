@@ -8,6 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         body { 
             margin: 0; padding: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
@@ -35,6 +36,10 @@
         .register-link { display: block; margin-top: 20px; color: #00d4ff; text-decoration: none; }
         .register-link:hover { text-decoration: underline; color: white; }
         .error-msg { color: #ff4d4d; margin-bottom: 15px; font-weight: bold; }
+        
+        /* CSS cho nút Admin */
+        .admin-link { display: block; margin-top: 15px; color: #ffcc00; text-decoration: none; font-weight: bold; font-size: 14px;}
+        .admin-link:hover { text-decoration: underline; color: white; }
     </style>
 </head>
 <body>
@@ -53,7 +58,10 @@
             </div>
             <button type="submit" class="btn-submit">VÀO TRƯỜNG QUAY</button>
         </form>
+        
         <a href="/Account/Register" class="register-link">Chưa có vé? Đăng ký ngay</a>
+        
+        <a href="/Account/AdminLogin" class="admin-link"><i class="fas fa-user-shield"></i> Dành cho Quản trị viên</a>
     </div>
 </body>
 </html>

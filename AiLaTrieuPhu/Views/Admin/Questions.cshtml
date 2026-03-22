@@ -1,0 +1,84 @@
+﻿@model IEnumerable<AiLaTrieuPhu.Models.Question>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Quản lý Câu hỏi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { background: #020813; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: rgba(10, 31, 68, 0.8); border-radius: 10px; overflow: hidden;}
+        th, td { border: 1px solid rgba(0, 212, 255, 0.3); padding: 12px; text-align: left; }
+        th { background: rgba(0,212,255,0.2); color: #ffcc00; text-transform: uppercase; }
+        tr:hover { background: rgba(0, 212, 255, 0.1); }
+        .btn { padding: 8px 15px; text-decoration: none; border-radius: 5px; color: black; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px;}
+        .btn-add { background: #00d4ff; }
+        .btn-add:hover { background: #fff; box-shadow: 0 0 10px #00d4ff; }
+        .btn-edit { background: #ffcc00; }
+        .btn-edit:hover { background: #fff; box-shadow: 0 0 10px #ffcc00;}
+        .btn-delete { background: #ff4d4d; color: white;}
+        .btn-delete:hover { background: #fff; color: #ff4d4d; box-shadow: 0 0 10px #ff4d4d;}
+        
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; border: 1px solid #00d4ff;}
+        .upload-form { display: flex; align-items: center; gap: 10px; }
+        .upload-form input[type="file"] { color: white; background: #051024; border: 1px dashed #ffcc00; padding: 5px; border-radius: 5px;}
+        .btn-back { color: #00d4ff; text-decoration: none; font-size: 16px; display: inline-block; margin-bottom: 20px; transition: 0.3s;}
+        .btn-back:hover { text-shadow: 0 0 10px #00d4ff; }
+    </style>
+</head>
+<body>
+    <a href="/Admin/Index" class="btn-back"><i class="fas fa-arrow-left"></i> Trở về Dashboard</a>
+    <h2 style="color: #ffcc00; margin-top: 0;"><i class="fas fa-database"></i> Quản lý Ngân hàng Câu hỏi</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(0, 255, 204, 0.2); color: #00ffcc; padding: 15px; margin-bottom: 20px; border-radius: 5px; font-weight: bold; border-left: 5px solid #00ffcc;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(255, 77, 77, 0.2); color: #ff4d4d; padding: 15px; margin-bottom: 20px; border-radius: 5px; font-weight: bold; border-left: 5px solid #ff4d4d;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="action-bar">
+        <a href="/Admin/CreateQuestion" class="btn btn-add"><i class="fas fa-plus"></i> Thêm câu hỏi thủ công</a>
+        
+        <form method="post" action="/Admin/ImportExcel" enctype="multipart/form-data" class="upload-form">
+            <span style="color: #ffcc00; font-weight: bold;"><i class="fas fa-file-excel"></i> Nhập từ Excel (Cột A-G):</span>
+            <input type="file" name="file" accept=".xlsx" required />
+            <button type="submit" class="btn btn-edit"><i class="fas fa-upload"></i> Tải lên</button>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="50">ID</th>
+                <th width="80">Level</th>
+                <th>Nội dung câu hỏi</th>
+                <th width="100">Đáp án</th>
+                <th width="120">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var q in Model)
+            {
+                <tr>
+                    <td>@q.Id</td>
+                    <td style="color: #ffcc00; font-weight: bold; text-align: center;">@q.Level</td>
+                    <td>@q.Content</td>
+                    <td style="color:#00ffcc; font-weight:bold; text-align: center;">@q.CorrectAnswer</td>
+                    <td>
+                        <a href="/Admin/EditQuestion/@q.Id" class="btn btn-edit" title="Sửa"><i class="fas fa-edit"></i></a>
+                        <a href="/Admin/DeleteQuestion/@q.Id" class="btn btn-delete" title="Xóa" onclick="return confirm('Bạn chắc chắn muốn xóa câu hỏi này?');"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
