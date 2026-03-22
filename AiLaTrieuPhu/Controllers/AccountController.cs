@@ -17,7 +17,6 @@ namespace AiLaTrieuPhu.Controllers
             _context = context;
         }
 
-        // ================= CỔNG ĐĂNG NHẬP NGƯỜI CHƠI =================
         public IActionResult Login() => View();
 
         [HttpPost]
@@ -27,16 +26,11 @@ namespace AiLaTrieuPhu.Controllers
 
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                // Chặn Admin đăng nhập ở cổng người chơi thường
-                if (user.Role == "Admin")
-                {
-                    ViewBag.Error = "Tài khoản Quản trị vui lòng truy cập cổng Admin!";
-                    return View();
-                }
-
+                // Lưu ID và Quyền vào Session để hệ thống nhận diện
                 HttpContext.Session.SetInt32("UserId", user.Id);
                 HttpContext.Session.SetString("Role", user.Role);
 
+                // Sau khi đăng nhập, tất cả đều về trang chủ (Home)
                 return RedirectToAction("Index", "Home");
             }
 
@@ -44,38 +38,6 @@ namespace AiLaTrieuPhu.Controllers
             return View();
         }
 
-        // ================= CỔNG ĐĂNG NHẬP QUẢN TRỊ VIÊN =================
-        public IActionResult AdminLogin() => View();
-
-        [HttpPost]
-        public IActionResult AdminLogin(string username, string password)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Username == username);
-
-            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
-            {
-                // CHỈ CHO PHÉP TÀI KHOẢN CÓ ROLE LÀ "Admin"
-                if (user.Role == "Admin")
-                {
-                    HttpContext.Session.SetInt32("UserId", user.Id);
-                    HttpContext.Session.SetString("Role", user.Role);
-
-                    // Đăng nhập thành công -> Bay thẳng vào trang Dashboard Quản trị
-                    return RedirectToAction("Index", "Admin");
-                }
-                else
-                {
-                    // User thường cố tình mò vào cổng Admin
-                    ViewBag.Error = "Tài khoản này không có quyền Quản trị viên!";
-                    return View();
-                }
-            }
-
-            ViewBag.Error = "Sai tài khoản hoặc mật khẩu";
-            return View();
-        }
-
-        // ================= ĐĂNG KÝ VÀ ĐĂNG XUẤT =================
         public IActionResult Register() => View();
 
         [HttpPost]
@@ -91,16 +53,13 @@ namespace AiLaTrieuPhu.Controllers
             {
                 Username = username,
                 Password = BCrypt.Net.BCrypt.HashPassword(password),
-                Role = "User", // Mặc định ai đăng ký cũng là User
+                Role = "User",
                 CreatedAt = DateTime.UtcNow
             };
 
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            // --- ĐIỂM THAY ĐỔI Ở ĐÂY ---
-            // Gán thông báo thành công và giữ người dùng ở lại trang để xem Popup, 
-            // Popup sẽ có nút chuyển sang trang Đăng nhập
             ViewBag.Success = "Tài khoản của bạn đã được khởi tạo thành công!";
             return View();
         }

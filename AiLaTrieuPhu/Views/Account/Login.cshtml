@@ -26,7 +26,6 @@
             width: 100%; padding: 12px; border-radius: 30px; border: 1px solid #00d4ff;
             background: transparent; color: white; outline: none; font-size: 16px; box-sizing: border-box;
         }
-        .input-group input::placeholder { color: #888; }
         .btn-submit {
             width: 100%; padding: 12px; border-radius: 30px; border: none;
             background: linear-gradient(180deg, #ffcc00, #b38f00); color: black;
@@ -36,14 +35,11 @@
         .register-link { display: block; margin-top: 20px; color: #00d4ff; text-decoration: none; }
         .register-link:hover { text-decoration: underline; color: white; }
         .error-msg { color: #ff4d4d; margin-bottom: 15px; font-weight: bold; }
-        
-        /* CSS cho nút Admin */
-        .admin-link { display: block; margin-top: 15px; color: #ffcc00; text-decoration: none; font-weight: bold; font-size: 14px;}
-        .admin-link:hover { text-decoration: underline; color: white; }
     </style>
 </head>
 <body>
     <div class="login-box">
+        <div style="width: 60px; height: 60px; border: 3px solid #ffcc00; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 30px; color: #ffcc00; box-shadow: 0 0 15px #ffcc00;">?</div>
         <h2>Đăng Nhập</h2>
         @if (ViewBag.Error != null)
         {
@@ -58,10 +54,7 @@
             </div>
             <button type="submit" class="btn-submit">VÀO TRƯỜNG QUAY</button>
         </form>
-        
         <a href="/Account/Register" class="register-link">Chưa có vé? Đăng ký ngay</a>
-        
-        <a href="/Account/AdminLogin" class="admin-link"><i class="fas fa-user-shield"></i> Dành cho Quản trị viên</a>
     </div>
 </body>
 </html>

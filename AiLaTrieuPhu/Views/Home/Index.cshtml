@@ -128,9 +128,9 @@
             color: #fff; text-decoration: none; font-size: 18px; font-weight: 600; text-transform: uppercase;
             letter-spacing: 2px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative; overflow: hidden;
+            cursor: pointer;
         }
         
-        /* Hiệu ứng tia sáng lướt qua khi hover */
         .cyber-btn::after {
             content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
@@ -147,7 +147,6 @@
         }
         .cyber-btn:hover i { color: #fff; text-shadow: 0 0 10px #fff; transform: scale(1.1);}
 
-        /* Nút Play đặc biệt */
         .btn-play { 
             background: linear-gradient(90deg, rgba(0,255,204,0.1), rgba(0,0,0,0.4));
             border-color: #00ffcc; border-left: 4px solid #00ffcc; 
@@ -155,20 +154,17 @@
         .btn-play i { color: #00ffcc; }
         .btn-play:hover { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0, 255, 204, 0.5); }
 
-        /* Nút Admin & Đăng xuất */
         .btn-admin { border-color: rgba(255,204,0,0.5); } .btn-admin i { color: #ffcc00; }
         .btn-admin:hover { border-color: #ffcc00; box-shadow: 0 0 20px rgba(255,204,0,0.4); }
         
         .btn-logout { border-color: rgba(255,77,77,0.5); } .btn-logout i { color: #ff4d4d; }
         .btn-logout:hover { border-color: #ff4d4d; box-shadow: 0 0 20px rgba(255,77,77,0.4); background: rgba(255, 77, 77, 0.1);}
 
-        /* ================= HIỆU ỨNG ANIMATION ================= */
         @@keyframes spin { 100% { transform: rotate(360deg); } }
         @@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
         @@keyframes pulse-glow { 0% { text-shadow: 0 0 20px #ffcc00, 0 0 40px rgba(255,204,0,0.6); transform: scale(0.97); } 100% { text-shadow: 0 0 30px #ffcc00, 0 0 60px rgba(255,204,0,0.9), 0 0 100px rgba(255,204,0,0.5); transform: scale(1.03); } }
         @@keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
 
-        /* ================= ĐÁP ỨNG ĐIỆN THOẠI ================= */
         @@media (max-width: 1050px) {
             .cyber-container { flex-direction: column; gap: 40px; padding: 30px 15px; }
             .glass-panel { max-width: 100%; width: 100%; }
@@ -240,8 +236,16 @@
         <div class="glass-panel">
             <div class="panel-title">Hệ Thống Điều Khiển</div>
 
+            @* CHỈ HIỆN NÚT QUẢN TRỊ NẾU LÀ ADMIN, USER THƯỜNG SẼ KHÔNG THẤY GÌ TẠI ĐÂY *@
+            @if (ViewBag.Role == "Admin")
+            {
+                <a href="/Admin/Index" class="cyber-btn btn-admin">
+                    <i class="fas fa-cogs"></i> Quản Trị Hệ Thống
+                </a>
+            }
+
             <a href="/Game/Index" class="cyber-btn btn-play">
-                <i class="fas fa-play-circle"></i> Bắt Đầu Chơi
+                <i class="fas fa-play-circle"></i> Bắt Đâu Chơi
             </a>
             <a href="/Home/About" class="cyber-btn">
                 <i class="fas fa-info-circle"></i> Giới Thiệu Luật
@@ -253,18 +257,35 @@
                 <i class="fas fa-history"></i> Lịch Sử Chơi
             </a>
 
-            @if (ViewBag.Role == "Admin")
-            {
-                <a href="/Admin/Index" class="cyber-btn btn-admin">
-                    <i class="fas fa-cogs"></i> Quản Trị Dữ Liệu
-                </a>
-            }
-
-            <a href="/Account/Logout" class="cyber-btn btn-logout" onclick="return confirm('Ngắt kết nối khỏi hệ thống?');">
+            @* NÚT ĐĂNG XUẤT VỚI THÔNG BÁO SWEETALERT2 GIỮA MÀN HÌNH *@
+            <a href="javascript:void(0);" class="cyber-btn btn-logout" id="btnLogout">
                 <i class="fas fa-power-off"></i> Đăng Xuất
             </a>
         </div>
 
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('btnLogout').addEventListener('click', function () {
+            Swal.fire({
+                title: 'XÁC NHẬN ĐĂNG XUẤT',
+                text: "Bạn có chắc chắn muốn rời khỏi hệ thống không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#00d4ff',
+                cancelButtonColor: '#ff4d4d',
+                confirmButtonText: '<i class="fas fa-check"></i> Đồng ý!',
+                cancelButtonText: 'Ở lại chơi tiếp',
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff',
+                backdrop: `rgba(0,0,0,0.8)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Account/Logout';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
