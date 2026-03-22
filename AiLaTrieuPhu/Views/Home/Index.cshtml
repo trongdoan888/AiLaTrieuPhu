@@ -6,133 +6,265 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Menu - Ai Là Triệu Phú</title>
+    <title>Hệ Thống - Ai Là Triệu Phú</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-            /* Nền tối sâu thẳm giống trường quay */
-            body, html {
-                margin: 0;
-                padding: 0;
-                height: 100%;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: radial-gradient(circle, #102a4d 0%, #020b1a 100%);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
+        @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
 
-            .menu-container {
-                text-align: center;
-                width: 100%;
-                max-width: 500px;
-                padding: 20px;
-            }
+        /* ================= NỀN LƯỚI KHÔNG GIAN ================= */
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+            background-color: #030712;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 60%),
+                linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            background-position: center center;
+            color: white; display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden;
+        }
 
-            /* Logo game */
-            .logo-wrapper {
-                margin-bottom: 40px;
-                animation: glow 2s infinite alternate;
-            }
+        .cyber-container {
+            display: flex; flex-direction: row; align-items: center; justify-content: center;
+            gap: 50px; width: 100%; max-width: 1400px; padding: 30px; z-index: 2;
+        }
 
-            .main-logo {
-                width: 100px;
-                height: 100px;
-                border: 5px solid #ffcc00;
-                border-radius: 50%;
-                margin: 0 auto 15px;
-                color: #ffcc00;
-                font-size: 60px;
-                font-weight: bold;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
-            }
+        /* ================= HIỆU ỨNG KÍNH MỜ (GLASSMORPHISM) ================= */
+        .glass-panel {
+            background: rgba(6, 15, 30, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-top: 1px solid rgba(0, 212, 255, 0.5);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,212,255,0.05);
+            flex: 1; display: flex; flex-direction: column; gap: 15px; max-width: 380px;
+        }
 
-            h1 {
-                color: #ffffff;
-                text-shadow: 0 0 10px #00d4ff;
-                letter-spacing: 3px;
-                margin: 0;
-            }
+        .panel-title {
+            color: #00d4ff; text-transform: uppercase; letter-spacing: 4px; font-size: 20px; font-weight: 700;
+            text-align: center; margin-bottom: 15px; text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+            position: relative;
+        }
+        .panel-title::after {
+            content: ''; display: block; width: 50px; height: 3px; background: #00d4ff;
+            margin: 10px auto 0; border-radius: 5px; box-shadow: 0 0 10px #00d4ff;
+        }
 
-            /* Các nút Menu */
-            .menu-buttons {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
-            }
+        /* ================= CỘT TRÁI: DASHBOARD THỐNG KÊ ================= */
+        .cyber-stat {
+            display: flex; align-items: center; gap: 18px;
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #00d4ff; border-radius: 12px; padding: 15px;
+            transition: 0.3s ease; position: relative; overflow: hidden;
+        }
+        .cyber-stat:hover {
+            background: rgba(0, 212, 255, 0.05); border-color: rgba(0, 212, 255, 0.3);
+            transform: translateX(5px);
+        }
+        
+        .stat-icon {
+            width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            font-size: 22px; background: rgba(255,255,255,0.03);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .stat-info { flex: 1; }
+        .stat-label { font-size: 13px; text-transform: uppercase; color: #a1b0c9; margin: 0 0 5px; font-weight: 600; letter-spacing: 1px;}
+        .stat-value { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: 1px; color: #fff;}
 
-            .btn-menu {
-                display: block;
-                background: linear-gradient(180deg, #1a4a8a 0%, #051933 100%);
-                border: 2px solid #00d4ff;
-                color: #ffffff;
-                padding: 15px 20px;
-                text-decoration: none;
-                font-size: 18px;
-                font-weight: bold;
-                border-radius: 30px;
-                text-transform: uppercase;
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-            }
+        /* Phối màu mượt hơn cho từng ô thống kê */
+        .c-user { border-left-color: #00d4ff; } .c-user .stat-icon { color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+        .c-gold { border-left-color: #ffcc00; } .c-gold .stat-icon { color: #ffcc00; border: 1px solid rgba(255,204,0,0.3); } .c-gold .stat-value { color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.4); }
+        .c-play { border-left-color: #b366ff; } .c-play .stat-icon { color: #b366ff; border: 1px solid rgba(179,102,255,0.3); }
+        .c-win { border-left-color: #00ffcc; } .c-win .stat-icon { color: #00ffcc; border: 1px solid rgba(0,255,204,0.3); }
+        .c-lose { border-left-color: #ff4d4d; } .c-lose .stat-icon { color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
 
-            .btn-menu i {
-                margin-right: 10px;
-                color: #ffcc00;
-            }
+        /* ================= CỘT GIỮA: VÒNG TRÒN NĂNG LƯỢNG (CORE) ================= */
+        .center-core {
+            flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; animation: floating 4s ease-in-out infinite;
+        }
 
-            .btn-menu:hover {
-                background: #ffcc00;
-                color: #051933;
-                border-color: #ffcc00;
-                box-shadow: 0 0 20px rgba(255, 204, 0, 0.8);
-                transform: scale(1.05);
-            }
+        .hud-rings {
+            position: relative; width: 380px; height: 380px;
+            display: flex; justify-content: center; align-items: center;
+        }
 
-            .btn-menu:hover i {
-                color: #051933;
-            }
+        .ring-1 {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 2px dashed rgba(0, 212, 255, 0.4); border-top: 4px solid #00d4ff; border-bottom: 4px solid #00d4ff;
+            animation: spin 25s linear infinite; box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+        }
+        .ring-2 {
+            position: absolute; width: 82%; height: 82%; border-radius: 50%;
+            border: 2px dotted rgba(255, 204, 0, 0.6); animation: spin-reverse 20s linear infinite;
+        }
+        .ring-3 {
+            position: absolute; width: 65%; height: 65%; border-radius: 50%;
+            border: 3px solid rgba(0, 255, 204, 0.2); border-left: 4px solid #00ffcc; border-right: 4px solid #00ffcc;
+            animation: spin 15s linear infinite; box-shadow: inset 0 0 30px rgba(0, 255, 204, 0.2);
+        }
 
-            .btn-logout {
-                border-color: #ff4d4d;
-                margin-top: 20px;
-            }
+        .core-symbol {
+            font-size: 160px; font-weight: 700; color: #ffcc00; z-index: 10;
+            text-shadow: 0 0 20px #ffcc00, 0 0 40px rgba(255,204,0,0.8), 0 0 80px rgba(255,204,0,0.5);
+            animation: pulse-glow 2.5s infinite alternate;
+        }
 
-            .btn-logout i {
-                color: #ff4d4d;
-            }
+        .pedestal {
+            width: 250px; height: 25px; border-radius: 50%; border: 1px solid rgba(0,212,255,0.5);
+            background: radial-gradient(ellipse at center, rgba(0,212,255,0.5) 0%, transparent 60%);
+            box-shadow: 0 15px 40px rgba(0,212,255,0.6); margin-top: 30px;
+        }
 
-            .btn-logout:hover {
-                background: #ff4d4d;
-                border-color: #ff4d4d;
-                box-shadow: 0 0 20px rgba(255, 77, 77, 0.8);
-            }
+        /* ================= CỘT PHẢI: MENU CHỨC NĂNG ================= */
+        .cyber-btn {
+            display: flex; align-items: center; gap: 15px; padding: 16px 25px;
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 12px;
+            color: #fff; text-decoration: none; font-size: 18px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 2px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; overflow: hidden;
+        }
+        
+        /* Hiệu ứng tia sáng lướt qua khi hover */
+        .cyber-btn::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        .cyber-btn:hover::after { left: 150%; }
 
-            @@keyframes glow {
-                from { text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff; }
-                to { text-shadow: 0 0 20px #00d4ff, 0 0 30px #00d4ff; }
-            }
+        .cyber-btn i { font-size: 22px; color: #00d4ff; transition: 0.3s; width: 30px; text-align: center;}
+        
+        .cyber-btn:hover {
+            background: rgba(0, 212, 255, 0.1); border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), inset 0 0 10px rgba(0, 212, 255, 0.2);
+            transform: translateY(-3px);
+        }
+        .cyber-btn:hover i { color: #fff; text-shadow: 0 0 10px #fff; transform: scale(1.1);}
+
+        /* Nút Play đặc biệt */
+        .btn-play { 
+            background: linear-gradient(90deg, rgba(0,255,204,0.1), rgba(0,0,0,0.4));
+            border-color: #00ffcc; border-left: 4px solid #00ffcc; 
+        }
+        .btn-play i { color: #00ffcc; }
+        .btn-play:hover { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0, 255, 204, 0.5); }
+
+        /* Nút Admin & Đăng xuất */
+        .btn-admin { border-color: rgba(255,204,0,0.5); } .btn-admin i { color: #ffcc00; }
+        .btn-admin:hover { border-color: #ffcc00; box-shadow: 0 0 20px rgba(255,204,0,0.4); }
+        
+        .btn-logout { border-color: rgba(255,77,77,0.5); } .btn-logout i { color: #ff4d4d; }
+        .btn-logout:hover { border-color: #ff4d4d; box-shadow: 0 0 20px rgba(255,77,77,0.4); background: rgba(255, 77, 77, 0.1);}
+
+        /* ================= HIỆU ỨNG ANIMATION ================= */
+        @@keyframes spin { 100% { transform: rotate(360deg); } }
+        @@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @@keyframes pulse-glow { 0% { text-shadow: 0 0 20px #ffcc00, 0 0 40px rgba(255,204,0,0.6); transform: scale(0.97); } 100% { text-shadow: 0 0 30px #ffcc00, 0 0 60px rgba(255,204,0,0.9), 0 0 100px rgba(255,204,0,0.5); transform: scale(1.03); } }
+        @@keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+
+        /* ================= ĐÁP ỨNG ĐIỆN THOẠI ================= */
+        @@media (max-width: 1050px) {
+            .cyber-container { flex-direction: column; gap: 40px; padding: 30px 15px; }
+            .glass-panel { max-width: 100%; width: 100%; }
+            .center-core { order: -1; margin-bottom: 20px; }
+            .hud-rings { width: 280px; height: 280px; }
+            .core-symbol { font-size: 120px; }
+            .pedestal { width: 180px; }
+        }
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <div class="logo-wrapper">
-            <div class="main-logo">?</div>
-            <h1>AI LÀ TRIỆU PHÚ</h1>
+    <div class="cyber-container">
+        
+        <div class="glass-panel">
+            <div class="panel-title">Hồ Sơ Cá Nhân</div>
+            
+            <div class="cyber-stat c-user">
+                <div class="stat-icon"><i class="fas fa-user-astronaut"></i></div>
+                <div class="stat-info">
+                    <p class="stat-label">Người Chơi</p>
+                    <p class="stat-value">@ViewBag.Username</p>
+                    @if(ViewBag.Role == "Admin"){ <span style="font-size:12px; color:#ffcc00; font-weight:600;"><i class="fas fa-crown"></i> Quản Trị Viên</span> }
+                </div>
+            </div>
+
+            <div class="cyber-stat c-gold">
+                <div class="stat-icon"><i class="fas fa-sack-dollar"></i></div>
+                <div class="stat-info">
+                    <p class="stat-label">Tổng Tiền Tích Lũy</p>
+                    <p class="stat-value">@(String.Format("{0:N0}", ViewBag.TotalMoney ?? 0)) VNĐ</p>
+                </div>
+            </div>
+
+            <div class="cyber-stat c-play">
+                <div class="stat-icon"><i class="fas fa-play"></i></div>
+                <div class="stat-info">
+                    <p class="stat-label">Số Lần Chơi: <span style="color:#fff; font-size:16px;">@(ViewBag.TotalGames ?? 0)</span></p>
+                    <p class="stat-label" style="margin:0;">Level Trung Bình: <span style="color:#fff; font-size:16px;">@(ViewBag.AverageLevel ?? 0)</span></p>
+                </div>
+            </div>
+
+            <div class="cyber-stat c-win">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                <div class="stat-info">
+                    <p class="stat-label">Số Lần Phá Đảo</p>
+                    <p class="stat-value">@(ViewBag.TotalWins ?? 0)</p>
+                </div>
+            </div>
+
+            <div class="cyber-stat c-lose">
+                <div class="stat-icon"><i class="fas fa-skull"></i></div>
+                <div class="stat-info">
+                    <p class="stat-label">Số Lần Bị Loại</p>
+                    <p class="stat-value">@(ViewBag.TotalLosses ?? 0)</p>
+                </div>
+            </div>
         </div>
 
-        <div class="menu-buttons">
-            <a href="/Game/Index" class="btn-menu"><i class="fas fa-play"></i> Chơi Game</a>
-            <a href="/Home/About" class="btn-menu"><i class="fas fa-info-circle"></i> Giới Thiệu</a>
-            <a href="/Ranking/Index" class="btn-menu"><i class="fas fa-trophy"></i> Bảng Xếp Hạng</a>
-            
-            <a href="/History/Index?userId=@ViewBag.UserId" class="btn-menu"><i class="fas fa-history"></i> Lịch Sử Chơi</a>
-            
-            <a href="/Account/Logout" class="btn-menu btn-logout" onclick="return confirm('Bạn có chắc chắn muốn rời khỏi trường quay không?');"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+        <div class="center-core">
+            <div class="hud-rings">
+                <div class="ring-1"></div>
+                <div class="ring-2"></div>
+                <div class="ring-3"></div>
+                <div class="core-symbol">?</div>
+            </div>
+            <div class="pedestal"></div>
         </div>
+
+        <div class="glass-panel">
+            <div class="panel-title">Hệ Thống Điều Khiển</div>
+
+            <a href="/Game/Index" class="cyber-btn btn-play">
+                <i class="fas fa-play-circle"></i> Bắt Đầu Chơi
+            </a>
+            <a href="/Home/About" class="cyber-btn">
+                <i class="fas fa-info-circle"></i> Giới Thiệu Luật
+            </a>
+            <a href="/Ranking/Index" class="cyber-btn">
+                <i class="fas fa-chart-line"></i> Bảng Vàng
+            </a>
+            <a href="/History/Index?userId=@ViewBag.UserId" class="cyber-btn">
+                <i class="fas fa-history"></i> Lịch Sử Chơi
+            </a>
+
+            @if (ViewBag.Role == "Admin")
+            {
+                <a href="/Admin/Index" class="cyber-btn btn-admin">
+                    <i class="fas fa-cogs"></i> Quản Trị Dữ Liệu
+                </a>
+            }
+
+            <a href="/Account/Logout" class="cyber-btn btn-logout" onclick="return confirm('Ngắt kết nối khỏi hệ thống?');">
+                <i class="fas fa-power-off"></i> Đăng Xuất
+            </a>
+        </div>
+
     </div>
 </body>
 </html>

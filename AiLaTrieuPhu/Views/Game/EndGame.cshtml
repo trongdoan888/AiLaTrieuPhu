@@ -1,0 +1,82 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết thúc - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+            /* Nền tối sâu thẳm hòa quyện trước khi hộp thoại bật lên */
+            body {
+                background: #030712;
+                margin: 0;
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-family: 'Segoe UI', Tahoma, sans-serif;
+            }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        let reason = '@ViewBag.Reason';
+        let money = '@String.Format("{0:N0}", ViewBag.Money)';
+        let time = '@ViewBag.TotalTime';
+        let level = '@ViewBag.LevelReached';
+            
+        let title = "Kết Thúc Lượt Chơi";
+        let icon = "info";
+            
+        // Tùy chỉnh Tiêu đề và Icon dựa vào lý do kết thúc game
+        if (reason === "win") {
+        title = "🎉 CHIẾN THẮNG LỊCH SỬ 🎉";
+        icon = "success";
+        } else if (reason === "lose") {
+        title = "Rất Tiếc! Bạn Đã Trả Lời Sai";
+        icon = "error";
+        } else if (reason === "timeout") {
+        title = "Hết Giờ Suy Nghĩ!";
+        icon = "warning";
+        } else if (reason === "quit") {
+        title = "Đã Dừng Cuộc Chơi";
+        icon = "info";
+        }
+
+        // Giao diện nội dung của bảng tổng kết
+        let htmlText = `
+        <div style="font-size: 18px; line-height: 1.6; text-align: center;">
+        Bạn đã dừng chân ở <b>Level ${level} / 15</b><br/>
+        <i class="fas fa-stopwatch" style="color:#00d4ff;"></i> Thời gian chơi: <b>${time} giây</b><br/><br/>
+        <div style="font-size: 16px; color: #a1b0c9; text-transform: uppercase; font-weight: bold;">Tiền thưởng nhận được</div>
+        <div style="color: #00ffcc; font-size: 38px; font-weight: bold; text-shadow: 0 0 15px rgba(0,255,204,0.6); margin-top: 5px;">
+        ${money} VNĐ
+        </div>
+        </div>
+        `;
+
+        // Bật hộp thoại
+        Swal.fire({
+        title: title,
+        html: htmlText,
+        icon: icon,
+        confirmButtonText: '<i class="fas fa-home"></i> Trở Về Trang Chủ',
+        confirmButtonColor: '#00d4ff',
+        background: 'rgba(6, 15, 30, 0.95)',
+        color: '#fff',
+        allowOutsideClick: false, // Bắt buộc phải bấm nút xác nhận mới thoát được
+        backdrop: `rgba(0,0,0,0.9)`
+        }).then(() => {
+        // Xác nhận xong sẽ quay về Dashboard trang chủ
+        window.location.href = '/Home/Index';
+        });
+        });
+    </script>
+</body>
+</html>

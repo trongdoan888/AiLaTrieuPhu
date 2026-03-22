@@ -98,7 +98,11 @@ namespace AiLaTrieuPhu.Controllers
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            return RedirectToAction("Login");
+            // --- ĐIỂM THAY ĐỔI Ở ĐÂY ---
+            // Gán thông báo thành công và giữ người dùng ở lại trang để xem Popup, 
+            // Popup sẽ có nút chuyển sang trang Đăng nhập
+            ViewBag.Success = "Tài khoản của bạn đã được khởi tạo thành công!";
+            return View();
         }
 
         public IActionResult Logout()

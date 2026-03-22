@@ -180,7 +180,13 @@ namespace AiLaTrieuPhu.Controllers
             HttpContext.Session.Remove("Used_Call");
             HttpContext.Session.Remove("Used_Audience");
 
-            return RedirectToAction("Index", "History", new { userId = userId });
+            // --- ĐIỂM THAY ĐỔI: TRUYỀN DỮ LIỆU ĐỂ HIỂN THỊ POPUP TỔNG KẾT ---
+            ViewBag.Reason = reason;
+            ViewBag.Money = money;
+            ViewBag.TotalTime = totalTime;
+            ViewBag.LevelReached = levelReached;
+
+            return View("EndGame");
         }
 
         [HttpPost]

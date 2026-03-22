@@ -1,6 +1,8 @@
-﻿@model IEnumerable<AiLaTrieuPhu.Models.Ranking>
-@{
+﻿@{
     Layout = null;
+    // Nhận 2 danh sách dữ liệu từ Controller
+    var topScores = ViewBag.TopScores as List<AiLaTrieuPhu.Models.Ranking>;
+    var topMoney = ViewBag.TopMoney as List<AiLaTrieuPhu.Controllers.UserMoneyRanking>;
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -10,66 +12,147 @@
     <title>Bảng Xếp Hạng - Ai Là Triệu Phú</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        body {
-            margin: 0; padding: 20px; min-height: 100vh;
-            background: radial-gradient(circle at top, #0a1f44 0%, #020813 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
+    @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+
+        /* ================= NỀN LƯỚI KHÔNG GIAN ĐỒNG BỘ ================= */
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+            background-color: #030712;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 80%),
+                linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: white; 
         }
+
         .btn-home {
             position: absolute; top: 20px; left: 20px; padding: 10px 20px; text-decoration: none;
-            background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #00d4ff;
-            border-radius: 20px; transition: 0.3s; font-weight: bold;
+            background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; color: #00d4ff;
+            border-radius: 8px; transition: 0.3s; font-weight: 600; text-transform: uppercase;
         }
-        .btn-home:hover { background: #00d4ff; color: black; box-shadow: 0 0 10px #00d4ff; }
-        .container { max-width: 800px; margin: 60px auto 0; text-align: center; }
-        h1 { color: #ffcc00; font-size: 36px; text-transform: uppercase; text-shadow: 0 0 10px #ffcc00; margin-bottom: 30px; }
-        .rank-table {
-            width: 100%; border-collapse: collapse; background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px; overflow: hidden; border: 1px solid #ffcc00;
+        .btn-home:hover { background: #00d4ff; color: #000; box-shadow: 0 0 15px #00d4ff; }
+
+        .page-title {
+            text-align: center; margin: 60px 0 30px; color: #ffcc00; font-size: 40px;
+            text-transform: uppercase; text-shadow: 0 0 20px rgba(255,204,0,0.6); font-weight: 700;
         }
-        .rank-table th, .rank-table td { padding: 15px; border-bottom: 1px solid rgba(255, 204, 0, 0.2); }
-        .rank-table th { background: rgba(255, 204, 0, 0.2); color: #ffcc00; text-transform: uppercase; }
-        /* Tô màu Top 3 */
-        .rank-table tr:nth-child(1) td { color: #ffcc00; font-size: 20px; font-weight: bold; background: rgba(255, 215, 0, 0.1); }
-        .rank-table tr:nth-child(2) td { color: #c0c0c0; font-size: 18px; font-weight: bold; background: rgba(192, 192, 192, 0.1); }
-        .rank-table tr:nth-child(3) td { color: #cd7f32; font-size: 18px; font-weight: bold; background: rgba(205, 127, 50, 0.1); }
+
+        .ranking-container {
+            display: flex; gap: 30px; max-width: 1300px; margin: 0 auto; padding: 0 20px 40px;
+            flex-wrap: wrap; justify-content: center;
+        }
+
+        /* KHUNG KÍNH MỜ */
+        .glass-panel {
+            flex: 1; min-width: 400px;
+            background: rgba(6, 15, 30, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 212, 255, 0.2); border-top: 1px solid rgba(0, 212, 255, 0.5);
+            border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .panel-title {
+            color: #00ffcc; text-align: center; font-size: 26px; text-transform: uppercase; margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(0,255,204,0.5); font-weight: 700; letter-spacing: 2px;
+        }
+        .panel-title.gold { color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.5); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 20px; }
+        th { color: #a1b0c9; font-size: 16px; text-transform: uppercase; font-weight: 600; border-bottom: 2px solid rgba(0,212,255,0.3); }
+        
+        /* Tô màu Top 3 danh giá */
+        tr:nth-child(1) td { color: #ffcc00; font-weight: bold; background: rgba(255, 204, 0, 0.05); font-size: 24px; }
+        tr:nth-child(2) td { color: #c0c0c0; font-weight: bold; background: rgba(192, 192, 192, 0.05); }
+        tr:nth-child(3) td { color: #cd7f32; font-weight: bold; background: rgba(205, 127, 50, 0.05); }
+
+        tr:hover td { background: rgba(0, 212, 255, 0.1); }
+        
+        .rank-number { font-weight: bold; width: 60px;}
+        .money-text { color: #00ffcc; font-weight: 700; letter-spacing: 1px; }
+        .score-text { color: #ffcc00; font-weight: 700; }
+        .time-text { color: #a1b0c9; font-size: 18px !important; }
+
+        @@media(max-width: 900px) {
+            .ranking-container { flex-direction: column; }
+            .glass-panel { min-width: 100%; }
+        }
     </style>
 </head>
 <body>
     <a href="/Home/Index" class="btn-home"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
     
-    <div class="container">
-        <h1><i class="fas fa-trophy"></i> Bảng Vàng Triệu Phú</h1>
-        <table class="rank-table">
-            <thead>
-                <tr>
-                    <th>Hạng</th>
-                    <th>Người chơi</th>
-                    <th>Điểm số</th>
-                    <th>Tổng thời gian</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{ int rank = 1; }
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var item in Model)
+    <h1 class="page-title"><i class="fas fa-trophy"></i> Hệ Thống Bảng Vàng</h1>
+
+    <div class="ranking-container">
+        
+        <div class="glass-panel">
+            <div class="panel-title gold"><i class="fas fa-sack-dollar"></i> Đại Gia Triệu Phú</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hạng</th>
+                        <th>Người chơi</th>
+                        <th style="text-align: right;">Tổng tài sản</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int rankMoney = 1; }
+                    @if (topMoney != null && topMoney.Any())
                     {
-                        <tr>
-                            <td>#@rank</td>
-                            <td>@(item.User?.Username ?? "Ẩn danh")</td>
-                            <td>@item.Score</td>
-                            <td>@item.TimePlayed giây</td>
-                        </tr>
-                        rank++;
+                        foreach (var item in topMoney)
+                        {
+                            <tr>
+                                <td class="rank-number">#@rankMoney</td>
+                                <td>@item.Username</td>
+                                <td style="text-align: right;" class="money-text">@String.Format("{0:N0}", item.TotalMoney) VNĐ</td>
+                            </tr>
+                            rankMoney++;
+                        }
                     }
-                }
-                else
-                {
-                    <tr><td colspan="4">Chưa có ai ghi danh lên bảng vàng.</td></tr>
-                }
-            </tbody>
-        </table>
+                    else
+                    {
+                        <tr><td colspan="3" style="text-align:center;">Chưa có dữ liệu giao dịch.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="glass-panel">
+            <div class="panel-title"><i class="fas fa-bolt"></i> Cao Thủ Siêu Tốc</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hạng</th>
+                        <th>Người chơi</th>
+                        <th>Điểm</th>
+                        <th style="text-align: right;">Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int rankScore = 1; }
+                    @if (topScores != null && topScores.Any())
+                    {
+                        foreach (var item in topScores)
+                        {
+                            <tr>
+                                <td class="rank-number">#@rankScore</td>
+                                <td>@(item.User?.Username ?? "Ẩn danh")</td>
+                                <td class="score-text">@item.Score</td>
+                                <td style="text-align: right;" class="time-text"><i class="fas fa-stopwatch" style="color: #00d4ff; font-size:14px;"></i> @item.TimePlayed s</td>
+                            </tr>
+                            rankScore++;
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" style="text-align:center;">Chưa có dữ liệu phá đảo.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </body>
 </html>
