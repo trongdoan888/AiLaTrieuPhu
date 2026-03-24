@@ -26,11 +26,15 @@ namespace AiLaTrieuPhu.Controllers
 
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                // Lưu ID và Quyền vào Session để hệ thống nhận diện
+                if (user.IsLocked && user.Role != "Admin")
+                {
+                    ViewBag.Error = "Tài khoản của bạn đã bị khóa bởi Quản trị viên!";
+                    return View();
+                }
+
                 HttpContext.Session.SetInt32("UserId", user.Id);
                 HttpContext.Session.SetString("Role", user.Role);
 
-                // Sau khi đăng nhập, tất cả đều về trang chủ (Home)
                 return RedirectToAction("Index", "Home");
             }
 
@@ -40,8 +44,9 @@ namespace AiLaTrieuPhu.Controllers
 
         public IActionResult Register() => View();
 
+        // CẬP NHẬT: Đăng ký yêu cầu thêm Email
         [HttpPost]
-        public IActionResult Register(string username, string password)
+        public IActionResult Register(string username, string password, string email)
         {
             if (_context.Users.Any(u => u.Username == username))
             {
@@ -53,7 +58,9 @@ namespace AiLaTrieuPhu.Controllers
             {
                 Username = username,
                 Password = BCrypt.Net.BCrypt.HashPassword(password),
+                Email = email, // Lưu Email
                 Role = "User",
+                IsLocked = false,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -63,6 +70,55 @@ namespace AiLaTrieuPhu.Controllers
             ViewBag.Success = "Tài khoản của bạn đã được khởi tạo thành công!";
             return View();
         }
+
+        // ================= QUÊN MẬT KHẨU (YÊU CẦU USER + EMAIL) =================
+
+        public IActionResult ForgotPassword() => View();
+
+        [HttpPost]
+        public IActionResult ResetPasswordRequest(string username, string email)
+        {
+            // CẬP NHẬT: Kiểm tra khớp cả Tên tài khoản VÀ Email
+            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Email == email);
+
+            if (user == null)
+            {
+                ViewBag.Error = "Thông tin tài khoản hoặc Email xác thực không chính xác!";
+                return View("ForgotPassword");
+            }
+
+            if (user.Role == "Admin")
+            {
+                ViewBag.Error = "Không thể reset mật khẩu cho tài khoản quản trị viên!";
+                return View("ForgotPassword");
+            }
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword("123456");
+            _context.SaveChanges();
+
+            ViewBag.Success = "Xác thực thành công! Mật khẩu đã được reset về: 123456";
+            return View("ForgotPassword");
+        }
+
+        // ================= CẬP NHẬT EMAIL CHO TÀI KHOẢN CŨ =================
+
+        [HttpPost]
+        public IActionResult UpdateEmail(string email)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return Unauthorized();
+
+            var user = _context.Users.Find(userId);
+            if (user != null)
+            {
+                user.Email = email;
+                _context.SaveChanges();
+                return Ok(new { message = "Cập nhật Email thành công" });
+            }
+            return BadRequest();
+        }
+
+        // ===============================================================
 
         public IActionResult Logout()
         {

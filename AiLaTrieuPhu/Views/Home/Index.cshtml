@@ -55,7 +55,7 @@
             margin: 10px auto 0; border-radius: 5px; box-shadow: 0 0 10px #00d4ff;
         }
 
-        /* ================= CỘT TRÁI: DASHBOARD THỐNG KÊ ================= */
+        /* ================= THỐNG KÊ ================= */
         .cyber-stat {
             display: flex; align-items: center; gap: 18px;
             background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
@@ -76,14 +76,13 @@
         .stat-label { font-size: 13px; text-transform: uppercase; color: #a1b0c9; margin: 0 0 5px; font-weight: 600; letter-spacing: 1px;}
         .stat-value { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: 1px; color: #fff;}
 
-        /* Phối màu mượt hơn cho từng ô thống kê */
         .c-user { border-left-color: #00d4ff; } .c-user .stat-icon { color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
         .c-gold { border-left-color: #ffcc00; } .c-gold .stat-icon { color: #ffcc00; border: 1px solid rgba(255,204,0,0.3); } .c-gold .stat-value { color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.4); }
         .c-play { border-left-color: #b366ff; } .c-play .stat-icon { color: #b366ff; border: 1px solid rgba(179,102,255,0.3); }
         .c-win { border-left-color: #00ffcc; } .c-win .stat-icon { color: #00ffcc; border: 1px solid rgba(0,255,204,0.3); }
         .c-lose { border-left-color: #ff4d4d; } .c-lose .stat-icon { color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3); }
 
-        /* ================= CỘT GIỮA: VÒNG TRÒN NĂNG LƯỢNG (CORE) ================= */
+        /* ================= VÒNG TRÒN NĂNG LƯỢNG ================= */
         .center-core {
             flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center;
             position: relative; animation: floating 4s ease-in-out infinite;
@@ -121,7 +120,7 @@
             box-shadow: 0 15px 40px rgba(0,212,255,0.6); margin-top: 30px;
         }
 
-        /* ================= CỘT PHẢI: MENU CHỨC NĂNG ================= */
+        /* ================= MENU CHỨC NĂNG ================= */
         .cyber-btn {
             display: flex; align-items: center; gap: 15px; padding: 16px 25px;
             background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 12px;
@@ -165,13 +164,11 @@
         @@keyframes pulse-glow { 0% { text-shadow: 0 0 20px #ffcc00, 0 0 40px rgba(255,204,0,0.6); transform: scale(0.97); } 100% { text-shadow: 0 0 30px #ffcc00, 0 0 60px rgba(255,204,0,0.9), 0 0 100px rgba(255,204,0,0.5); transform: scale(1.03); } }
         @@keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
 
+        /* Layout mobile */
         @@media (max-width: 1050px) {
             .cyber-container { flex-direction: column; gap: 40px; padding: 30px 15px; }
             .glass-panel { max-width: 100%; width: 100%; }
             .center-core { order: -1; margin-bottom: 20px; }
-            .hud-rings { width: 280px; height: 280px; }
-            .core-symbol { font-size: 120px; }
-            .pedestal { width: 180px; }
         }
     </style>
 </head>
@@ -190,6 +187,17 @@
                 </div>
             </div>
 
+            @if(string.IsNullOrEmpty(ViewBag.UserEmail))
+            {
+                <div class="cyber-stat" style="border-left-color: #00ffcc; cursor: pointer;" onclick="showInputEmail()">
+                    <div class="stat-icon" style="color:#00ffcc; border-color:#00ffcc;"><i class="fas fa-envelope-open-text"></i></div>
+                    <div class="stat-info">
+                        <p class="stat-label" style="color:#00ffcc;">Cần Xác Thực Email</p>
+                        <p style="font-size:12px; margin:0; color:#a1b0c9;">Bấm để cập nhật ngay</p>
+                    </div>
+                </div>
+            }
+
             <div class="cyber-stat c-gold">
                 <div class="stat-icon"><i class="fas fa-sack-dollar"></i></div>
                 <div class="stat-info">
@@ -202,7 +210,7 @@
                 <div class="stat-icon"><i class="fas fa-play"></i></div>
                 <div class="stat-info">
                     <p class="stat-label">Số Lần Chơi: <span style="color:#fff; font-size:16px;">@(ViewBag.TotalGames ?? 0)</span></p>
-                    <p class="stat-label" style="margin:0;">Level Trung Bình: <span style="color:#fff; font-size:16px;">@(ViewBag.AverageLevel ?? 0)</span></p>
+                    <p class="stat-label" style="margin:0;">Level TB: <span style="color:#fff; font-size:16px;">@(ViewBag.AverageLevel ?? 0)</span></p>
                 </div>
             </div>
 
@@ -236,7 +244,6 @@
         <div class="glass-panel">
             <div class="panel-title">Hệ Thống Điều Khiển</div>
 
-            @* CHỈ HIỆN NÚT QUẢN TRỊ NẾU LÀ ADMIN, USER THƯỜNG SẼ KHÔNG THẤY GÌ TẠI ĐÂY *@
             @if (ViewBag.Role == "Admin")
             {
                 <a href="/Admin/Index" class="cyber-btn btn-admin">
@@ -257,7 +264,6 @@
                 <i class="fas fa-history"></i> Lịch Sử Chơi
             </a>
 
-            @* NÚT ĐĂNG XUẤT VỚI THÔNG BÁO SWEETALERT2 GIỮA MÀN HÌNH *@
             <a href="javascript:void(0);" class="cyber-btn btn-logout" id="btnLogout">
                 <i class="fas fa-power-off"></i> Đăng Xuất
             </a>
@@ -267,6 +273,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // ================= XỬ LÝ ĐĂNG XUẤT =================
         document.getElementById('btnLogout').addEventListener('click', function () {
             Swal.fire({
                 title: 'XÁC NHẬN ĐĂNG XUẤT',
@@ -275,17 +282,92 @@
                 showCancelButton: true,
                 confirmButtonColor: '#00d4ff',
                 cancelButtonColor: '#ff4d4d',
-                confirmButtonText: '<i class="fas fa-check"></i> Đồng ý!',
-                cancelButtonText: 'Ở lại chơi tiếp',
+                confirmButtonText: 'Đồng ý!',
+                cancelButtonText: 'Ở lại',
                 background: 'rgba(6, 15, 30, 0.95)',
-                color: '#fff',
-                backdrop: `rgba(0,0,0,0.8)`
+                color: '#fff'
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = '/Account/Logout';
                 }
             });
         });
+
+        // ================= XỬ LÝ CẬP NHẬT EMAIL TỰ ĐỘNG =================
+        @if (string.IsNullOrEmpty(ViewBag.UserEmail))
+        {
+            <text>
+            document.addEventListener("DOMContentLoaded", function() {
+                setTimeout(() => {
+                    Swal.fire({
+                        title: 'XÁC THỰC BẢO MẬT',
+                        text: "Tài khoản chưa liên kết Email. Hãy cập nhật để có thể khôi phục mật khẩu khi cần!",
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'Cập nhật ngay',
+                        cancelButtonText: 'Để sau',
+                        background: 'rgba(6, 15, 30, 0.95)',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            showInputEmail();
+                        }
+                    });
+                }, 1500);
+            });
+            </text>
+        }
+
+        function showInputEmail() {
+            Swal.fire({
+                title: 'NHẬP EMAIL CỦA BẠN',
+                input: 'email',
+                inputPlaceholder: 'Nhập địa chỉ Gmail...',
+                showCancelButton: true,
+                confirmButtonText: 'Tiếp theo',
+                cancelButtonText: 'Hủy',
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    const email = result.value;
+                    // Hỏi xác nhận lần cuối như Trọng yêu cầu
+                    Swal.fire({
+                        title: 'XÁC NHẬN CUỐI',
+                        text: `Bạn có chắc chắn muốn dùng Email: ${email} để bảo mật tài khoản không?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Chắc chắn',
+                        cancelButtonText: 'Để tôi kiểm tra lại',
+                        background: 'rgba(6, 15, 30, 0.95)',
+                        color: '#fff'
+                    }).then((confirmFinal) => {
+                        if (confirmFinal.isConfirmed) {
+                            // Gửi AJAX về server
+                            const formData = new FormData();
+                            formData.append('email', email);
+
+                            fetch('/Account/UpdateEmail', {
+                                method: 'POST',
+                                body: formData
+                            }).then(response => {
+                                if (response.ok) {
+                                    Swal.fire({
+                                        title: 'THÀNH CÔNG!',
+                                        text: 'Email đã được liên kết với tài khoản.',
+                                        icon: 'success',
+                                        background: 'rgba(6, 15, 30, 0.95)',
+                                        color: '#fff'
+                                    }).then(() => location.reload());
+                                } else {
+                                    Swal.fire('Lỗi!', 'Không thể cập nhật email.', 'error');
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>

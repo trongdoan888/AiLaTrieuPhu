@@ -10,5 +10,9 @@
         public string D { get; set; } = "";
         public string CorrectAnswer { get; set; } = "";
         public int Level { get; set; }
+
+        // --- THÊM 2 CỘT MỚI ---
+        public string Hint { get; set; } = ""; // Gợi ý
+        public string Category { get; set; } = ""; // Dạng câu hỏi (Lịch sử, Toán học, Giải trí...)
     }
 }

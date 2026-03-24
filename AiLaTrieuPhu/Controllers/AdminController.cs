@@ -4,7 +4,9 @@ using AiLaTrieuPhu.Models;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 using ClosedXML.Excel;
+using System;
 
 namespace AiLaTrieuPhu.Controllers
 {
@@ -17,13 +19,12 @@ namespace AiLaTrieuPhu.Controllers
             _context = context;
         }
 
-        // Hàm kiểm tra quyền Admin
         private bool IsAdmin()
         {
             return HttpContext.Session.GetString("Role") == "Admin";
         }
 
-        // 1. TRANG CHỦ ADMIN (DASHBOARD)
+        // 1. DASHBOARD
         public IActionResult Index()
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
@@ -39,7 +40,10 @@ namespace AiLaTrieuPhu.Controllers
         public IActionResult Questions()
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
-            var questions = _context.Questions.OrderBy(q => q.Level).ThenBy(q => q.Id).ToList();
+            var questions = _context.Questions
+                .OrderBy(q => q.Category)
+                .ThenBy(q => q.Level)
+                .ToList();
             return View(questions);
         }
 
@@ -62,8 +66,16 @@ namespace AiLaTrieuPhu.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            if (model.Id == 0) _context.Questions.Add(model); // Thêm mới
-            else _context.Questions.Update(model);            // Sửa
+            if (model.Id == 0)
+            {
+                _context.Questions.Add(model);
+                TempData["Success"] = "Thêm câu hỏi mới thành công!";
+            }
+            else
+            {
+                _context.Questions.Update(model);
+                TempData["Success"] = "Cập nhật câu hỏi thành công!";
+            }
 
             _context.SaveChanges();
             return RedirectToAction("Questions");
@@ -77,11 +89,11 @@ namespace AiLaTrieuPhu.Controllers
             {
                 _context.Questions.Remove(q);
                 _context.SaveChanges();
+                TempData["Success"] = "Đã xóa câu hỏi!";
             }
             return RedirectToAction("Questions");
         }
 
-        // --- TÍNH NĂNG MỚI: NHẬP EXCEL ---
         [HttpPost]
         public IActionResult ImportExcel(IFormFile file)
         {
@@ -100,34 +112,36 @@ namespace AiLaTrieuPhu.Controllers
                     file.CopyTo(stream);
                     using (var workbook = new XLWorkbook(stream))
                     {
-                        var worksheet = workbook.Worksheet(1); // Đọc Sheet đầu tiên
-                        var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Bỏ qua dòng Tiêu đề (dòng 1)
+                        var worksheet = workbook.Worksheet(1);
+                        var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
 
                         foreach (var row in rows)
                         {
-                            var levelStr = row.Cell(1).Value.ToString();
-                            if (string.IsNullOrWhiteSpace(levelStr)) continue; // Bỏ qua nếu dòng trống
+                            var cat = row.Cell(1).Value.ToString();
+                            if (string.IsNullOrWhiteSpace(cat)) continue;
 
                             var q = new Question
                             {
-                                Level = int.Parse(levelStr),
-                                Content = row.Cell(2).Value.ToString(),
-                                A = row.Cell(3).Value.ToString(),
-                                B = row.Cell(4).Value.ToString(),
-                                C = row.Cell(5).Value.ToString(),
-                                D = row.Cell(6).Value.ToString(),
-                                CorrectAnswer = row.Cell(7).Value.ToString().Trim().ToUpper()
+                                Category = cat,
+                                Level = int.Parse(row.Cell(2).Value.ToString()),
+                                Content = row.Cell(3).Value.ToString(),
+                                A = row.Cell(4).Value.ToString(),
+                                B = row.Cell(5).Value.ToString(),
+                                C = row.Cell(6).Value.ToString(),
+                                D = row.Cell(7).Value.ToString(),
+                                CorrectAnswer = row.Cell(8).Value.ToString().Trim().ToUpper(),
+                                Hint = row.Cell(9).Value.ToString()
                             };
                             _context.Questions.Add(q);
                         }
                         _context.SaveChanges();
                     }
                 }
-                TempData["Success"] = "Nhập câu hỏi từ Excel thành công!";
+                TempData["Success"] = "Nhập bộ câu hỏi mới từ Excel thành công!";
             }
-            catch (System.Exception ex)
+            catch (Exception)
             {
-                TempData["Error"] = "Lỗi đọc file Excel. Vui lòng kiểm tra lại định dạng! Chi tiết: " + ex.Message;
+                TempData["Error"] = "Lỗi định dạng Excel! Hãy đảm bảo đủ 9 cột theo mẫu.";
             }
 
             return RedirectToAction("Questions");
@@ -142,14 +156,44 @@ namespace AiLaTrieuPhu.Controllers
             return View(users);
         }
 
+        // --- CHỨC NĂNG MỚI: KHÓA / MỞ KHÓA TÀI KHOẢN ---
+        public IActionResult ToggleLockUser(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+            var user = _context.Users.Find(id);
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+
+            // Không cho phép tự khóa chính mình và không khóa tài khoản Admin khác (nếu cần bảo mật)
+            if (user != null && user.Id != currentUserId && user.Role != "Admin")
+            {
+                user.IsLocked = !user.IsLocked;
+                _context.SaveChanges();
+                TempData["Success"] = user.IsLocked ? $"Đã khóa tài khoản {user.Username}" : $"Đã mở khóa tài khoản {user.Username}";
+            }
+            else
+            {
+                TempData["Error"] = "Không thể thực hiện thao tác này trên tài khoản quản trị!";
+            }
+
+            return RedirectToAction("Users");
+        }
+
         public IActionResult DeleteUser(int id)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
             var user = _context.Users.Find(id);
-            if (user != null && user.Id != HttpContext.Session.GetInt32("UserId"))
+
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (user != null && user.Id != currentUserId && user.Role != "Admin")
             {
                 _context.Users.Remove(user);
                 _context.SaveChanges();
+                TempData["Success"] = "Đã xóa tài khoản người dùng!";
+            }
+            else
+            {
+                TempData["Error"] = "Không thể xóa tài khoản quản trị!";
             }
             return RedirectToAction("Users");
         }

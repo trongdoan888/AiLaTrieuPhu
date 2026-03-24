@@ -115,7 +115,152 @@
                 {
                     <button class="btn-modal btn-login" onclick="window.location.href='/Account/Login'">Đăng Nhập Ngay</button>
                 }
+            </div>@@model AiLaTrieuPhu.Models.User
+@{
+    Layout = null;
+}<!DOCTYPE html><html lang="vi"><head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Nền và khung chuẩn form Đăng nhập */
+        body { 
+            margin: 0; padding: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #0a1f44 0%, #020813 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
+        }
+        .register-box {
+            background: rgba(0, 0, 0, 0.6); padding: 40px; border-radius: 20px;
+            border: 2px solid #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            text-align: center; width: 100%; max-width: 350px;
+            backdrop-filter: blur(10px);
+        }
+        .register-box h2 { color: #ffcc00; margin-top: 0; margin-bottom: 25px; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group input {
+            width: 100%; padding: 12px; border-radius: 30px; border: 1px solid #00d4ff;
+            background: rgba(0,0,0,0.2); color: white; outline: none; font-size: 16px; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .input-group input:focus { border-color: #ffcc00; box-shadow: 0 0 10px #ffcc00; }
+        .input-group input::placeholder { color: #888; }
+        
+        .btn-submit {
+            width: 100%; padding: 12px; border-radius: 30px; border: none;
+            background: linear-gradient(180deg, #ffcc00, #b38f00); color: black;
+            font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-submit:hover { box-shadow: 0 0 15px #ffcc00; transform: scale(1.05); }
+        
+        .btn-back { display: block; margin-top: 20px; color: #00d4ff; text-decoration: none; font-size: 15px; }
+        .btn-back:hover { text-decoration: underline; color: white; }
+
+        /* --- CSS CHO MODAL --- */
+        .modal-overlay {
+            display: none; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .custom-modal {
+            background: linear-gradient(180deg, #0f2c59, #051024);
+            border: 2px solid #00d4ff; border-radius: 20px; padding: 30px;
+            text-align: center; max-width: 400px; width: 90%;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .custom-modal.error { border-color: #ff4d4d; box-shadow: 0 0 30px rgba(255, 77, 77, 0.5); }
+        .custom-modal.success { border-color: #ffcc00; box-shadow: 0 0 30px rgba(255, 204, 0, 0.5); }
+        
+        .custom-modal h3 { margin-top: 0; font-size: 24px; }
+        .custom-modal.success h3 { color: #ffcc00; }
+        .custom-modal.error h3 { color: #ff4d4d; }
+        .custom-modal p { font-size: 16px; margin-bottom: 25px; line-height: 1.5; }
+        
+        .btn-modal {
+            padding: 10px 30px; border-radius: 20px; border: none; font-size: 16px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-modal.btn-ok { background: #00d4ff; color: #000; }
+        .btn-modal.btn-login { background: #ffcc00; color: #000; }
+
+        @@keyframes popIn { 
+            0% { transform: scale(0.5); opacity: 0; } 
+            100% { transform: scale(1); opacity: 1; } 
+        }
+    </style></head><body>
+    <div class="register-box">
+        <div style="width: 60px; height: 60px; border: 3px solid #00d4ff; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 30px; color: #00d4ff; box-shadow: 0 0 15px #00d4ff;"><i class="fas fa-user-plus"></i></div>
+        <h2>Đăng Ký</h2>
+        <form method="post" action="/Account/Register" id="registerForm">
+            <div class="input-group">
+                <input type="text" name="Username" placeholder="Tên tài khoản" required autocomplete="off" />
             </div>
+            <div class="input-group">
+                <input type="email" name="Email" placeholder="Địa chỉ Gmail bảo mật" required />
+            </div>
+            <div class="input-group">
+                <input type="password" id="Password" name="Password" placeholder="Mật khẩu" required />
+            </div>
+            <div class="input-group">
+                <input type="password" id="ConfirmPassword" name="ConfirmPassword" placeholder="Xác nhận mật khẩu" required />
+            </div>
+            <button type="submit" class="btn-submit">TẠO TÀI KHOẢN</button>
+        </form>
+        <a href="/Account/Login" class="btn-back"><i class="fas fa-arrow-left"></i> Quay lại Đăng nhập</a>
+    </div>
+
+    @if (ViewBag.Error != null || ViewBag.Success != null)
+    {
+        bool isError = ViewBag.Error != null;
+        string message = isError ? ViewBag.Error : ViewBag.Success;
+        string modalClass = isError ? "error" : "success";
+        string title = isError ? "Có Lỗi Xảy Ra!" : "Đăng Ký Thành Công!";
+        string icon = isError ? "fas fa-exclamation-triangle" : "fas fa-check-circle";
+
+        <div class="modal-overlay" id="customModal" style="display: flex;">
+            <div class="custom-modal @modalClass">
+                <h3><i class="@icon"></i> @title</h3>
+                <p>@message</p>
+                
+                @if (isError)
+                {
+                    <button class="btn-modal btn-ok" onclick="closeModal()">Đóng</button>
+                }
+                else
+                {
+                    <button class="btn-modal btn-login" onclick="window.location.href='/Account/Login'">Đăng Nhập Ngay</button>
+                }
+            </div>
+        </div>
+    }
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        // Kiểm tra khớp mật khẩu trước khi submit
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const pass = document.getElementById('Password').value;
+            const confirm = document.getElementById('ConfirmPassword').value;
+
+            if (pass !== confirm) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi mật khẩu',
+                    text: 'Mật khẩu xác nhận không khớp!',
+                    background: '#051024',
+                    color: '#fff',
+                    confirmButtonColor: '#ff4d4d'
+                });
+            }
+        });
+    </script></body></html>
         </div>
     }
 

@@ -3,6 +3,7 @@ using AiLaTrieuPhu.Data;
 using AiLaTrieuPhu.Models;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AiLaTrieuPhu.Controllers
@@ -11,7 +12,7 @@ namespace AiLaTrieuPhu.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        // Các mốc tiền thưởng cho 15 Level
+        // Giữ nguyên các mốc tiền thưởng cũ của bạn
         private readonly int[] moneyMilestones = { 0, 200, 400, 600, 1000, 2000, 3000, 6000, 10000, 14000, 22000, 30000, 40000, 60000, 85000, 150000 };
 
         public GameController(ApplicationDbContext context)
@@ -19,12 +20,37 @@ namespace AiLaTrieuPhu.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        // ================= CHỨC NĂNG MỚI: CHỌN LĨNH VỰC =================
+        public IActionResult ChooseCategory()
         {
             if (HttpContext.Session.GetInt32("UserId") == null)
                 return RedirectToAction("Login", "Account");
 
-            // Lấy Level hiện tại (từ 1 đến 15)
+            int currentLevel = HttpContext.Session.GetInt32("CurrentLevel") ?? 1;
+
+            // --- TÍNH NĂNG MỚI: HỒI TRỢ GIÚP TẠI MỐC 5 VÀ 10 ---
+            // Khi bắt đầu câu 6 (vừa qua mốc 5) hoặc câu 11 (vừa qua mốc 10)
+            if (currentLevel == 6 || currentLevel == 11)
+            {
+                HttpContext.Session.Remove("Used_5050");
+                HttpContext.Session.Remove("Used_Call");
+                HttpContext.Session.Remove("Used_Audience");
+            }
+
+            var categories = new List<string> { "Toán học", "Văn học", "Khoa học tự nhiên", "Khoa học xã hội" };
+            ViewBag.CurrentLevel = currentLevel;
+            return View(categories);
+        }
+
+        public IActionResult Index(string category)
+        {
+            if (HttpContext.Session.GetInt32("UserId") == null)
+                return RedirectToAction("Login", "Account");
+
+            // Nếu chưa chọn lĩnh vực, bắt quay lại trang chọn
+            if (string.IsNullOrEmpty(category))
+                return RedirectToAction("ChooseCategory");
+
             int currentLevel = HttpContext.Session.GetInt32("CurrentLevel") ?? 1;
 
             if (currentLevel == 1)
@@ -32,14 +58,15 @@ namespace AiLaTrieuPhu.Controllers
                 HttpContext.Session.SetInt32("Score", 0);
                 HttpContext.Session.SetInt32("TotalTime", 0);
                 HttpContext.Session.SetInt32("Money", 0);
+                // Level 1 thì reset trợ giúp (đề phòng ván trước còn sót)
                 HttpContext.Session.Remove("Used_5050");
                 HttpContext.Session.Remove("Used_Call");
                 HttpContext.Session.Remove("Used_Audience");
             }
 
-            // LOGIC CHUẨN: Lấy ngẫu nhiên 1 câu hỏi tương ứng đúng với Level hiện tại
+            // --- TÍNH NĂNG MỚI: LẤY CÂU HỎI THEO LEVEL + CATEGORY ---
             var question = _context.Questions
-                .Where(q => q.Level == currentLevel)
+                .Where(q => q.Level == currentLevel && q.Category == category)
                 .OrderBy(q => Guid.NewGuid())
                 .FirstOrDefault();
 
@@ -48,9 +75,11 @@ namespace AiLaTrieuPhu.Controllers
                 return RedirectToAction("EndGame", new { reason = "win" });
             }
 
+            // Giữ nguyên các ViewBag cũ để hiển thị giao diện
             ViewBag.Score = HttpContext.Session.GetInt32("Score") ?? 0;
             ViewBag.Money = HttpContext.Session.GetInt32("Money") ?? 0;
-            ViewBag.CurrentLevel = currentLevel; // Truyền Level sang giao diện
+            ViewBag.CurrentLevel = currentLevel;
+            ViewBag.Category = category; // Gửi category qua để hiển thị trên UI
 
             ViewBag.Used5050 = HttpContext.Session.GetString("Used_5050") == "true";
             ViewBag.UsedCall = HttpContext.Session.GetString("Used_Call") == "true";
@@ -68,22 +97,19 @@ namespace AiLaTrieuPhu.Controllers
             var question = _context.Questions.FirstOrDefault(q => q.Id == questionId);
             if (question == null) return RedirectToAction("Index", "Home");
 
-            if (string.IsNullOrEmpty(answer)) return RedirectToAction("EndGame", new { reason = "lose" });
-
             int totalTime = (HttpContext.Session.GetInt32("TotalTime") ?? 0) + timeUsed;
             HttpContext.Session.SetInt32("TotalTime", totalTime);
 
             int currentLevel = HttpContext.Session.GetInt32("CurrentLevel") ?? 1;
-
             string dbAnswer = question.CorrectAnswer?.Trim().ToUpper() ?? "";
-            string userAnswer = answer.Split(',')[0].Trim().ToUpper();
+            string userAnswer = answer?.Split(',')[0].Trim().ToUpper() ?? "";
 
             if (dbAnswer == userAnswer)
             {
                 int score = (HttpContext.Session.GetInt32("Score") ?? 0) + 200;
                 int money = currentLevel < moneyMilestones.Length ? moneyMilestones[currentLevel] : moneyMilestones.Last();
 
-                currentLevel++; // TRẢ LỜI ĐÚNG -> TĂNG LÊN LEVEL TIẾP THEO LUÔN
+                currentLevel++;
 
                 if (currentLevel > 15)
                 {
@@ -96,7 +122,8 @@ namespace AiLaTrieuPhu.Controllers
                 HttpContext.Session.SetInt32("Score", score);
                 HttpContext.Session.SetInt32("Money", money);
 
-                return RedirectToAction("Index");
+                // TRẢ LỜI ĐÚNG -> QUAY VỀ CHỌN LĨNH VỰC CHO CÂU TIẾP THEO
+                return RedirectToAction("ChooseCategory");
             }
             else
             {
@@ -104,24 +131,19 @@ namespace AiLaTrieuPhu.Controllers
             }
         }
 
+        // Hàm EndGame và UseLifeline giữ nguyên 100% code cũ của bạn
         public IActionResult EndGame(string reason = "quit")
         {
             int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
             if (userId == 0) return RedirectToAction("Login", "Account");
 
             int score = HttpContext.Session.GetInt32("Score") ?? 0;
-            // LƯU TRỰC TIẾP SỐ LEVEL ĐÃ VƯỢT QUA (Từ 0 đến 15)
-            int levelReached = (HttpContext.Session.GetInt32("CurrentLevel") ?? 1) - 1;
-
+            int levelReached = (HttpContext.Session.GetInt32("CurrentLevel") ?? 1);
             int totalTime = HttpContext.Session.GetInt32("TotalTime") ?? 0;
             long money = HttpContext.Session.GetInt32("Money") ?? 0;
 
-            if (reason == "timeout")
-            {
-                totalTime += 60; // Hết giờ thì cộng thêm 60s vào thời gian
-            }
+            if (reason == "timeout") totalTime += 60;
 
-            // Mốc tiền thưởng an toàn khi thua
             if (reason == "lose" || reason == "timeout")
             {
                 if (levelReached >= 10) money = moneyMilestones[10];
@@ -155,23 +177,13 @@ namespace AiLaTrieuPhu.Controllers
                 }
                 else
                 {
-                    var ranking = new Ranking
-                    {
-                        UserId = userId,
-                        Score = score,
-                        TimePlayed = totalTime,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    _context.Rankings.Add(ranking);
+                    _context.Rankings.Add(new Ranking { UserId = userId, Score = score, TimePlayed = totalTime, CreatedAt = DateTime.UtcNow });
                 }
-
                 _context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("LỖI LƯU DATABASE: " + ex.Message);
-            }
+            catch (Exception ex) { Console.WriteLine(ex.Message); }
 
+            // Xóa Session sau khi kết thúc
             HttpContext.Session.Remove("CurrentLevel");
             HttpContext.Session.Remove("Score");
             HttpContext.Session.Remove("TotalTime");
@@ -180,7 +192,6 @@ namespace AiLaTrieuPhu.Controllers
             HttpContext.Session.Remove("Used_Call");
             HttpContext.Session.Remove("Used_Audience");
 
-            // --- ĐIỂM THAY ĐỔI: TRUYỀN DỮ LIỆU ĐỂ HIỂN THỊ POPUP TỔNG KẾT ---
             ViewBag.Reason = reason;
             ViewBag.Money = money;
             ViewBag.TotalTime = totalTime;

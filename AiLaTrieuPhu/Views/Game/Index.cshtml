@@ -1,10 +1,7 @@
 ﻿@model AiLaTrieuPhu.Models.Question
 @{
     Layout = null;    
-    // Lấy số Câu/Level hiện tại (từ 1 đến 15)    
     int currentLevel = ViewBag.CurrentLevel ?? 1;
-
-    // Danh sách tiền thưởng tương ứng với 15 level
     int[] moneyLadder = { 200, 400, 600, 1000, 2000, 3000, 6000, 10000, 14000, 22000, 30000, 40000, 60000, 85000, 150000 };
 }
 <!DOCTYPE html>
@@ -31,7 +28,6 @@
             color: white; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* ================= TOP BAR KÍNH MỜ ================= */
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 40px; 
@@ -52,8 +48,6 @@
             border-radius: 8px; width: 45px; height: 45px; cursor: pointer;
             font-size: 18px; transition: 0.3s; margin-left: 15px;
         }
-        .btn-sound:hover { background: #00d4ff; color: #000; box-shadow: 0 0 15px #00d4ff; }
-        .btn-sound.muted { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255,77,77,0.1); }
 
         .timer-box {
             width: 80px; height: 80px; background: radial-gradient(circle, #00d4ff, #005580);
@@ -66,7 +60,6 @@
         .badge-money { font-size: 18px; color: #a1b0c9; font-weight: 600; }
         .badge-money span { color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.5); font-size: 20px;}
 
-        /* ================= BỐ CỤC CHÍNH (MÁY TÍNH) ================= */
         .main-game-layout {
             display: flex; gap: 40px; max-width: 1400px; width: 100%; margin: 0 auto; 
             padding: 30px; flex: 1; align-items: flex-end; justify-content: center;
@@ -109,7 +102,7 @@
             box-shadow: 0 0 25px rgba(0, 212, 255, 0.3); transform: scale(1.02);
         }
 
-        /* --- CỘT PHẢI: THANG TIỀN THƯỞNG KÍNH MỜ --- */
+        /* --- THANG TIỀN --- */
         .money-ladder-container {
             width: 320px; background: rgba(6, 15, 30, 0.6); backdrop-filter: blur(12px);
             border: 1px solid rgba(0, 212, 255, 0.2); border-top: 1px solid rgba(0, 212, 255, 0.5);
@@ -121,26 +114,10 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 15px; border-radius: 8px; font-weight: 600; font-size: 18px; transition: 0.3s;
         }
-        
-        .ladder-item.normal { color: #a1b0c9; }
-        .ladder-item.milestone { 
-            color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); 
-            background: rgba(255, 255, 255, 0.05); border-left: 3px solid #fff;
-        }
-        .ladder-item.active { 
-            background: #ffcc00; color: #000; font-weight: 700; font-size: 20px;
-            box-shadow: 0 0 20px rgba(255,204,0,0.6); transform: scale(1.05); z-index: 2; border: none;
-        }
+        .ladder-item.active { background: #ffcc00; color: #000; font-weight: 700; transform: scale(1.05); }
         .ladder-item.passed { color: #00ffcc; opacity: 0.5; }
-        
-        .ladder-level { width: 45px; text-align: left; }
-        .ladder-money { flex: 1; text-align: right; letter-spacing: 1px;}
-
-        /* Cảnh báo nhấp nháy khi hết giờ (ghi đè CSS cũ) */
-        .timer-warning { background: radial-gradient(circle, #ff4d4d, #990000) !important; box-shadow: 0 0 30px #ff4d4d !important; animation: pulse-danger 0.5s infinite !important;}
 
         @@keyframes pulse-border { from { box-shadow: 0 0 10px rgba(0,212,255,0.2); } to { box-shadow: 0 0 25px rgba(0,212,255,0.5), inset 0 0 10px rgba(0,212,255,0.1); } }
-        @@keyframes pulse-danger { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -169,6 +146,10 @@
     <div class="main-game-layout">
         
         <div class="game-content">
+            <div style="text-align:center; color:#00ffcc; margin-bottom:10px; font-weight:700; text-transform:uppercase; letter-spacing: 2px;">
+                Lĩnh vực: <span style="color:#ffcc00">@ViewBag.Category</span>
+            </div>
+
             <div class="lifelines">
                 <button class="lifeline-btn @(ViewBag.Used5050 ? "used" : "")" title="50/50" id="btn5050">
                     <i class="fas fa-star-half-alt"></i>
@@ -178,6 +159,10 @@
                 </button>
                 <button class="lifeline-btn @(ViewBag.UsedAudience ? "used" : "")" title="Hỏi ý kiến khán giả" id="btnAudience">
                     <i class="fas fa-users"></i>
+                </button>
+                
+                <button class="lifeline-btn" title="Xem gợi ý" id="btnShowHint" style="border-color: #00ffcc; color: #00ffcc;">
+                    <i class="fas fa-lightbulb"></i>
                 </button>
             </div>
 
@@ -191,18 +176,10 @@
                 <input type="hidden" id="correctAnswer" value="@Model.CorrectAnswer" />
 
                 <div class="answers-grid">
-                    <button type="button" class="answer-btn" value="A">
-                        <span class="letter">A:</span> @(Model?.A ?? "Đáp án A")
-                    </button>
-                    <button type="button" class="answer-btn" value="B">
-                        <span class="letter">B:</span> @(Model?.B ?? "Đáp án B")
-                    </button>
-                    <button type="button" class="answer-btn" value="C">
-                        <span class="letter">C:</span> @(Model?.C ?? "Đáp án C")
-                    </button>
-                    <button type="button" class="answer-btn" value="D">
-                        <span class="letter">D:</span> @(Model?.D ?? "Đáp án D")
-                    </button>
+                    <button type="button" class="answer-btn" value="A"><span class="letter">A:</span> @Model.A</button>
+                    <button type="button" class="answer-btn" value="B"><span class="letter">B:</span> @Model.B</button>
+                    <button type="button" class="answer-btn" value="C"><span class="letter">C:</span> @Model.C</button>
+                    <button type="button" class="answer-btn" value="D"><span class="letter">D:</span> @Model.D</button>
                 </div>
             </form>
         </div>
@@ -212,24 +189,17 @@
             {
                 bool isMilestone = (i == 5 || i == 10 || i == 15);
                 string cssClass = "ladder-item ";
-
                 if (i == currentLevel) { cssClass += "active"; } 
                 else if (i < currentLevel) { cssClass += "passed"; } 
                 else if (isMilestone) { cssClass += "milestone"; } 
                 else { cssClass += "normal"; }
 
                 <div class="@cssClass">
-                    <span class="ladder-level">
-                        @if (isMilestone && i >= currentLevel) { <i class="fas fa-gem" style="font-size: 10px; margin-right: 8px; color: #00d4ff;"></i> }
-                        @i
-                    </span>
-                    <span class="ladder-money">
-                        @String.Format("{0:N0}", moneyLadder[i - 1])
-                    </span>
+                    <span class="ladder-level">@i</span>
+                    <span class="ladder-money">@String.Format("{0:N0}", moneyLadder[i - 1])</span>
                 </div>
             }
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -237,10 +207,23 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Logic xử lý Gợi ý (Hint)
+            document.getElementById('btnShowHint').addEventListener('click', function() {
+                Swal.fire({
+                    title: 'GỢI Ý TỪ CHƯƠNG TRÌNH',
+                    text: '@Html.Raw(Model.Hint)',
+                    icon: 'info',
+                    background: 'rgba(6, 15, 30, 0.95)',
+                    color: '#fff',
+                    confirmButtonColor: '#00d4ff',
+                    confirmButtonText: 'Đã hiểu!'
+                });
+            });
+
+            // Giữ nguyên logic nhạc nền cũ của bạn
             const bgMusic = document.getElementById("bgMusic");
             const btnToggleSound = document.getElementById("btnToggleSound");
             const iconSound = btnToggleSound.querySelector("i");
-            
             let isMusicPlaying = false;
 
             function playMusic() {
@@ -248,25 +231,20 @@
                 bgMusic.play().then(() => {
                     isMusicPlaying = true;
                     iconSound.className = "fas fa-volume-up";
-                    btnToggleSound.classList.remove("muted");
-                }).catch(err => console.log("Trình duyệt chặn autoplay"));
+                }).catch(err => console.log("Blocked autoplay"));
             }
 
             document.body.addEventListener('click', function() {
-                if (!isMusicPlaying && bgMusic.paused) {
-                    playMusic();
-                }
+                if (!isMusicPlaying && bgMusic.paused) playMusic();
             }, { once: true });
 
             btnToggleSound.addEventListener("click", function(e) {
                 e.stopPropagation(); 
-                if (bgMusic.paused) {
-                    playMusic();
-                } else {
+                if (bgMusic.paused) playMusic();
+                else {
                     bgMusic.pause();
                     isMusicPlaying = false;
                     iconSound.className = "fas fa-volume-mute";
-                    btnToggleSound.classList.add("muted");
                 }
             });
         });

@@ -10,7 +10,6 @@ namespace AiLaTrieuPhu.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        // Bắt buộc phải có constructor này để kết nối Database
         public HomeController(ApplicationDbContext context)
         {
             _context = context;
@@ -24,32 +23,37 @@ namespace AiLaTrieuPhu.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // 1. Lấy thông tin tài khoản đang đăng nhập
+            // 1. Lấy thông tin tài khoản đang đăng nhập từ Database
+            // Cần lấy trực tiếp từ DB để đảm bảo trường Email luôn mới nhất
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null) return RedirectToAction("Logout", "Account");
 
             // 2. Lấy toàn bộ lịch sử chơi của tài khoản này
             var userGames = _context.Games.Where(g => g.UserId == userId).ToList();
 
-            // 3. Thực hiện tính toán thống kê
+            // 3. Thực hiện tính toán thống kê (Giữ nguyên logic cũ)
             int totalGames = userGames.Count;
-            int totalWins = userGames.Count(g => g.LevelReached >= 15); // Vượt 15 câu là Thắng
-            int totalLosses = totalGames - totalWins; // Còn lại là Thua
+            int totalWins = userGames.Count(g => g.LevelReached >= 15);
+            int totalLosses = totalGames - totalWins;
 
-            // Tính trung bình level (ép kiểu double để chia lấy phần thập phân)
             double averageLevel = totalGames > 0 ? userGames.Average(g => (double)g.LevelReached) : 0;
-
-            // Tính tổng tiền
             long totalMoney = totalGames > 0 ? userGames.Sum(g => g.Money) : 0;
 
-            // 4. Bơm dữ liệu sang View (Giao diện) thông qua ViewBag
+            // 4. Bơm dữ liệu sang View (Giao diện)
             ViewBag.UserId = userId;
-            ViewBag.Username = user?.Username ?? "Khách";
-            ViewBag.Role = HttpContext.Session.GetString("Role");
+            ViewBag.Username = user.Username;
+            ViewBag.Role = user.Role; // Lấy từ DB cho chắc chắn
+
+            // ================= PHẦN CẬP NHẬT MỚI =================
+            // Truyền Email ra để View kiểm tra và hiện Popup
+            ViewBag.UserEmail = user.Email;
+            // =====================================================
 
             ViewBag.TotalGames = totalGames;
             ViewBag.TotalWins = totalWins;
             ViewBag.TotalLosses = totalLosses;
-            ViewBag.AverageLevel = Math.Round(averageLevel, 1); // Làm tròn 1 chữ số
+            ViewBag.AverageLevel = Math.Round(averageLevel, 1);
             ViewBag.TotalMoney = totalMoney;
 
             return View();

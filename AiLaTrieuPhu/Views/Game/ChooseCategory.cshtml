@@ -1,0 +1,34 @@
+﻿@model List<string>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Chọn Lĩnh Vực - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+            @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
+            body { background: #030712; color: white; font-family: 'Rajdhani', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            .glass-panel { background: rgba(6, 15, 30, 0.8); padding: 40px; border-radius: 20px; border: 2px solid #00d4ff; text-align: center; box-shadow: 0 0 30px rgba(0, 212, 255, 0.3); width: 100%; max-width: 500px; }
+            h2 { color: #ffcc00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+            .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .cat-btn { padding: 20px; background: rgba(0, 212, 255, 0.05); border: 1px solid #00d4ff; color: white; border-radius: 12px; cursor: pointer; text-decoration: none; transition: 0.3s; font-weight: bold; font-size: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+            .cat-btn:hover { background: #00d4ff; color: #000; box-shadow: 0 0 20px #00d4ff; transform: translateY(-5px); }
+            .cat-btn i { font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="glass-panel">
+        <p style="color: #a1b0c9; margin: 0;">THỬ THÁCH CÂU SỐ @ViewBag.CurrentLevel</p>
+        <h2>CHỌN LĨNH VỰC</h2>
+        <div class="category-grid">
+            <a href="/Game/Index?category=Toán học" class="cat-btn"><i class="fas fa-calculator"></i> Toán học</a>
+            <a href="/Game/Index?category=Văn học" class="cat-btn"><i class="fas fa-book"></i> Văn học</a>
+            <a href="/Game/Index?category=Khoa học tự nhiên" class="cat-btn"><i class="fas fa-atom"></i> Tự nhiên</a>
+            <a href="/Game/Index?category=Khoa học xã hội" class="cat-btn"><i class="fas fa-globe-asia"></i> Xã hội</a>
+        </div>
+    </div>
+</body>
+</html>
