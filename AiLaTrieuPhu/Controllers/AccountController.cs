@@ -17,6 +17,7 @@ namespace AiLaTrieuPhu.Controllers
             _context = context;
         }
 
+        // ================= ĐĂNG NHẬP =================
         public IActionResult Login() => View();
 
         [HttpPost]
@@ -24,16 +25,20 @@ namespace AiLaTrieuPhu.Controllers
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == username);
 
+            // Kiểm tra user tồn tại và khớp mật khẩu (dùng BCrypt)
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
+                // Kiểm tra trạng thái khóa tài khoản (trừ Admin)
                 if (user.IsLocked && user.Role != "Admin")
                 {
                     ViewBag.Error = "Tài khoản của bạn đã bị khóa bởi Quản trị viên!";
                     return View();
                 }
 
+                // Lưu thông tin vào Session
                 HttpContext.Session.SetInt32("UserId", user.Id);
                 HttpContext.Session.SetString("Role", user.Role);
+                HttpContext.Session.SetString("Username", user.Username); // Lưu thêm username để hiển thị UI
 
                 return RedirectToAction("Index", "Home");
             }
@@ -42,23 +47,30 @@ namespace AiLaTrieuPhu.Controllers
             return View();
         }
 
+        // ================= ĐĂNG KÝ =================
         public IActionResult Register() => View();
 
-        // CẬP NHẬT: Đăng ký yêu cầu thêm Email
         [HttpPost]
         public IActionResult Register(string username, string password, string email)
         {
+            // Kiểm tra trùng lặp Username hoặc Email
             if (_context.Users.Any(u => u.Username == username))
             {
-                ViewBag.Error = "Tài khoản đã tồn tại";
+                ViewBag.Error = "Tên tài khoản đã tồn tại!";
+                return View();
+            }
+
+            if (_context.Users.Any(u => u.Email == email))
+            {
+                ViewBag.Error = "Email này đã được sử dụng cho tài khoản khác!";
                 return View();
             }
 
             var user = new User
             {
                 Username = username,
-                Password = BCrypt.Net.BCrypt.HashPassword(password),
-                Email = email, // Lưu Email
+                Password = BCrypt.Net.BCrypt.HashPassword(password), // Hash mật khẩu
+                Email = email,
                 Role = "User",
                 IsLocked = false,
                 CreatedAt = DateTime.UtcNow
@@ -72,13 +84,12 @@ namespace AiLaTrieuPhu.Controllers
         }
 
         // ================= QUÊN MẬT KHẨU (YÊU CẦU USER + EMAIL) =================
-
         public IActionResult ForgotPassword() => View();
 
         [HttpPost]
         public IActionResult ResetPasswordRequest(string username, string email)
         {
-            // CẬP NHẬT: Kiểm tra khớp cả Tên tài khoản VÀ Email
+            // Kiểm tra khớp cả Tên tài khoản VÀ Email
             var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Email == email);
 
             if (user == null)
@@ -87,12 +98,14 @@ namespace AiLaTrieuPhu.Controllers
                 return View("ForgotPassword");
             }
 
+            // Bảo mật cho Admin
             if (user.Role == "Admin")
             {
-                ViewBag.Error = "Không thể reset mật khẩu cho tài khoản quản trị viên!";
+                ViewBag.Error = "Không thể tự động reset mật khẩu cho quản trị viên!";
                 return View("ForgotPassword");
             }
 
+            // Reset về mật khẩu mặc định và Hash lại
             user.Password = BCrypt.Net.BCrypt.HashPassword("123456");
             _context.SaveChanges();
 
@@ -100,13 +113,18 @@ namespace AiLaTrieuPhu.Controllers
             return View("ForgotPassword");
         }
 
-        // ================= CẬP NHẬT EMAIL CHO TÀI KHOẢN CŨ =================
-
+        // ================= CẬP NHẬT EMAIL (CHO USER ĐÃ LOGIN) =================
         [HttpPost]
         public IActionResult UpdateEmail(string email)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return Unauthorized();
+
+            // Kiểm tra email mới có bị trùng với ai khác không
+            if (_context.Users.Any(u => u.Email == email && u.Id != userId))
+            {
+                return BadRequest(new { message = "Email này đã được sử dụng!" });
+            }
 
             var user = _context.Users.Find(userId);
             if (user != null)
@@ -118,8 +136,7 @@ namespace AiLaTrieuPhu.Controllers
             return BadRequest();
         }
 
-        // ===============================================================
-
+        // ================= ĐĂNG XUẤT =================
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
