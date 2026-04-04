@@ -1,0 +1,168 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Xác thực OTP - Ai Là Triệu Phú</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
+        
+        body { 
+            background: #030712; 
+            color: white; 
+            font-family: 'Rajdhani', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0;
+            background-image: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 80%);
+        }
+
+        .glass-box { 
+            background: rgba(6, 15, 30, 0.9); 
+            padding: 40px; 
+            border-radius: 20px; 
+            border: 1px solid #00d4ff; 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .otp-title { color: #00d4ff; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        .otp-desc { color: #a1b0c9; font-size: 14px; margin-bottom: 30px; }
+
+        /* Hiệu ứng Input mã OTP */
+        .otp-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .otp-field {
+            width: 45px;
+            height: 55px;
+            background: #020813;
+            border: 2px solid #1a4a8a;
+            border-radius: 8px;
+            color: #ffcc00;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .otp-field:focus {
+            border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            outline: none;
+        }
+
+        .btn-verify { 
+            background: #ffcc00; 
+            color: black; 
+            border: none; 
+            padding: 14px; 
+            width: 100%; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            text-transform: uppercase; 
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .btn-verify:hover { 
+            background: white; 
+            box-shadow: 0 0 20px #ffcc00; 
+            transform: translateY(-2px); 
+        }
+
+        .msg-error { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 8px; border: 1px solid #ff4d4d; margin-bottom: 20px; font-size: 14px; }
+
+        /* Rubik Mini Animation */
+        .mini-rubik { perspective: 600px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
+        .cube { width: 40px; height: 40px; position: relative; transform-style: preserve-3d; animation: rotate 10s linear infinite; }
+        .face { position: absolute; width: 40px; height: 40px; background: rgba(6, 15, 30, 0.8); border: 1px solid #00d4ff; }
+        .front  { transform: translateZ(20px); }
+        .back   { transform: rotateY(180deg) translateZ(20px); }
+        .top    { transform: rotateX(90deg) translateZ(20px); border-color: #ffcc00; }
+        .bottom { transform: rotateX(-90deg) translateZ(20px); border-color: #ffcc00; }
+        .right  { transform: rotateY(90deg) translateZ(20px); }
+        .left   { transform: rotateY(-90deg) translateZ(20px); }
+
+        @@keyframes rotate { 0% { transform: rotateX(0deg) rotateY(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="glass-box">
+        <div class="mini-rubik">
+            <div class="cube">
+                <div class="face front"></div><div class="face back"></div>
+                <div class="face top"></div><div class="face bottom"></div>
+                <div class="face right"></div><div class="face left"></div>
+            </div>
+        </div>
+
+        <h2 class="otp-title"><i class="fas fa-key"></i> XÁC THỰC OTP</h2>
+        <p class="otp-desc">Nhập mã 6 số chúng tôi vừa gửi vào Email của bạn để thiết lập lại mật khẩu.</p>
+
+        @if (ViewBag.Error != null) { 
+            <div class="msg-error"><i class="fas fa-exclamation-circle"></i> @ViewBag.Error</div> 
+        }
+
+        <form action="/Account/ConfirmOTP" method="post" id="otpForm">
+            <input type="hidden" name="otpInput" id="finalOtp" />
+            
+            <div class="otp-input-container">
+                <input type="text" class="otp-field" maxlength="1" />
+                <input type="text" class="otp-field" maxlength="1" />
+                <input type="text" class="otp-field" maxlength="1" />
+                <input type="text" class="otp-field" maxlength="1" />
+                <input type="text" class="otp-field" maxlength="1" />
+                <input type="text" class="otp-field" maxlength="1" />
+            </div>
+
+            <button type="submit" class="btn-verify">XÁC NHẬN MÃ</button>
+        </form>
+
+        <div style="margin-top: 25px;">
+            <a href="/Account/ForgotPassword" style="color: #a1b0c9; text-decoration: none; font-size: 13px;">
+                <i class="fas fa-redo"></i> Gửi lại mã khác
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Tự động chuyển ô khi nhập [cite: 1161]
+        const inputs = document.querySelectorAll('.otp-field');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length > 0 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Gộp 6 ô thành 1 chuỗi trước khi gửi [cite: 1171]
+        document.getElementById('otpForm').addEventListener('submit', function(e) {
+            let combinedOtp = "";
+            inputs.forEach(input => combinedOtp += input.value);
+            document.getElementById('finalOtp').value = combinedOtp;
+        });
+    </script>
+</body>
+</html>

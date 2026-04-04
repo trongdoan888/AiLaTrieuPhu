@@ -1,0 +1,52 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cấp Lại Mật Khẩu Thành Công</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
+
+        body { 
+            margin: 0; padding: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #0a1f44 0%, #020813 100%);
+            font-family: 'Rajdhani', sans-serif; color: white;
+        }
+        .success-box {
+            background: rgba(6, 15, 30, 0.8); padding: 40px; border-radius: 20px;
+            border: 2px solid #00ffcc; box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+            text-align: center; width: 100%; max-width: 400px; backdrop-filter: blur(10px);
+        }
+        .new-pass {
+            font-size: 42px; color: #ffcc00; font-weight: bold; letter-spacing: 5px;
+            margin: 25px 0; padding: 15px; background: rgba(255, 204, 0, 0.1);
+            border-radius: 10px; border: 1px dashed #ffcc00;
+        }
+        .btn-login {
+            display: inline-block; width: 100%; padding: 12px; border-radius: 30px; 
+            background: #00ffcc; color: black; font-weight: bold; text-decoration: none;
+            text-transform: uppercase; transition: 0.3s;
+        }
+        .btn-login:hover { background: white; box-shadow: 0 0 20px #00ffcc; }
+    </style>
+</head>
+<body>
+    <div class="success-box">
+        <i class="fas fa-check-circle" style="font-size: 60px; color: #00ffcc;"></i>
+        <h2 style="color: #00ffcc; text-transform: uppercase; margin-top: 15px;">Thành Công!</h2>
+        <p style="color: #a1b0c9;">Mật khẩu mới của bạn đã được khởi tạo:</p>
+        
+        <div class="new-pass">@ViewBag.NewPassword</div>
+        
+        <p style="font-size: 14px; color: #ff4d4d; margin-bottom: 25px;">
+            * Hãy lưu lại mật khẩu này và đổi lại ngay sau khi đăng nhập.
+        </p>
+
+        <a href="/Account/Login" class="btn-login">Đăng Nhập Ngay</a>
+    </div>
+</body>
+</html>

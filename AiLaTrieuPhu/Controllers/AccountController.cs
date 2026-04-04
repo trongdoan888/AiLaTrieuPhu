@@ -5,16 +5,23 @@ using Microsoft.AspNetCore.Http;
 using BCrypt.Net;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using MailKit.Net.Smtp;
+using MimeKit;
+using Microsoft.Extensions.Configuration;
+using MailKit.Security;
 
 namespace AiLaTrieuPhu.Controllers
 {
     public class AccountController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _config;
 
-        public AccountController(ApplicationDbContext context)
+        public AccountController(ApplicationDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // ================= ĐĂNG NHẬP =================
@@ -79,8 +86,7 @@ namespace AiLaTrieuPhu.Controllers
             return View();
         }
 
-        // ================= CHỨC NĂNG MỚI: ĐỔI MẬT KHẨU (USER + PASS CŨ) =================
-
+        // ================= ĐỔI MẬT KHẨU (USER ĐÃ LOGIN) =================
         public IActionResult ChangePassword() => View();
 
         [HttpPost]
@@ -88,21 +94,18 @@ namespace AiLaTrieuPhu.Controllers
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == username);
 
-            // Bước 1: Kiểm tra tài khoản và xác thực mật khẩu cũ
             if (user == null || !BCrypt.Net.BCrypt.Verify(oldPassword, user.Password))
             {
                 ViewBag.Error = "Tên tài khoản hoặc mật khẩu cũ không chính xác!";
                 return View();
             }
 
-            // Bước 2: Kiểm tra độ dài mật khẩu mới
             if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6)
             {
                 ViewBag.Error = "Mật khẩu mới phải có ít nhất 6 ký tự!";
                 return View();
             }
 
-            // Bước 3: Cập nhật mật khẩu mới (Hash lại)
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             _context.SaveChanges();
 
@@ -110,34 +113,7 @@ namespace AiLaTrieuPhu.Controllers
             return View();
         }
 
-        // ================= QUÊN MẬT KHẨU (YÊU CẦU USER + EMAIL) =================
-        public IActionResult ForgotPassword() => View();
-
-        [HttpPost]
-        public IActionResult ResetPasswordRequest(string username, string email)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Email == email);
-
-            if (user == null)
-            {
-                ViewBag.Error = "Thông tin tài khoản hoặc Email xác thực không chính xác!";
-                return View("ForgotPassword");
-            }
-
-            if (user.Role == "Admin")
-            {
-                ViewBag.Error = "Không thể tự động reset mật khẩu cho quản trị viên!";
-                return View("ForgotPassword");
-            }
-
-            user.Password = BCrypt.Net.BCrypt.HashPassword("123456");
-            _context.SaveChanges();
-
-            ViewBag.Success = "Xác thực thành công! Mật khẩu đã được reset về: 123456";
-            return View("ForgotPassword");
-        }
-
-        // ================= CẬP NHẬT EMAIL (CHO USER ĐÃ LOGIN) =================
+        // ================= CẬP NHẬT EMAIL =================
         [HttpPost]
         public IActionResult UpdateEmail(string email)
         {
@@ -157,6 +133,97 @@ namespace AiLaTrieuPhu.Controllers
                 return Ok(new { message = "Cập nhật Email thành công" });
             }
             return BadRequest();
+        }
+
+        // ================= QUÊN MẬT KHẨU (XÁC THỰC OTP QUA EMAIL) =================
+        public IActionResult ForgotPassword() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> SendOTP(string username, string email)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Email == email);
+
+            if (user == null || user.Role == "Admin")
+            {
+                ViewBag.Error = "Thông tin tài khoản hoặc Email không chính xác!";
+                return View("ForgotPassword");
+            }
+
+            // 1. Tạo mã OTP 6 số
+            string otpCode = new Random().Next(100000, 999999).ToString();
+            HttpContext.Session.SetString("ResetOTP", otpCode);
+            HttpContext.Session.SetString("ResetUser", username);
+
+            // 2. Gửi Email
+            try
+            {
+                await SendEmailAsync(email, "Mã xác nhận Reset mật khẩu",
+                    $"Mã OTP của bạn là: <b style='font-size: 20px; color: #00d4ff;'>{otpCode}</b>. Vui lòng nhập mã này để tiếp tục.");
+
+                ViewBag.Success = "Mã OTP đã được gửi đến Email của bạn!";
+                return View("VerifyOTP");
+            }
+            catch (Exception ex)
+            {
+                // In lỗi chi tiết ra Terminal để kiểm tra
+                Console.WriteLine("\n=== LỖI SMTP CHI TIẾT ===");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("==========================\n");
+
+                ViewBag.Error = "Có lỗi xảy ra khi gửi Email. Vui lòng kiểm tra lại cấu hình SMTP!";
+                return View("ForgotPassword");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ConfirmOTP(string otpInput)
+        {
+            string sessionOTP = HttpContext.Session.GetString("ResetOTP");
+            string username = HttpContext.Session.GetString("ResetUser");
+
+            if (string.IsNullOrEmpty(sessionOTP) || sessionOTP != otpInput)
+            {
+                ViewBag.Error = "Mã OTP không chính xác hoặc đã hết hạn!";
+                return View("VerifyOTP");
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user != null)
+            {
+                // Cấp mật khẩu mới ngẫu nhiên
+                string newPass = new Random().Next(100000, 999999).ToString();
+                user.Password = BCrypt.Net.BCrypt.HashPassword(newPass);
+                _context.SaveChanges();
+
+                HttpContext.Session.Remove("ResetOTP");
+                ViewBag.NewPassword = newPass;
+                return View("ResetSuccess");
+            }
+
+            return RedirectToAction("Login");
+        }
+
+        // Hàm bổ trợ gửi Email - Đã cập nhật sửa lỗi Revocation
+        private async Task SendEmailAsync(string email, string subject, string message)
+        {
+            var emailSettings = _config.GetSection("EmailSettings");
+            var mimeMessage = new MimeMessage();
+            mimeMessage.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["SenderEmail"]));
+            mimeMessage.To.Add(new MailboxAddress("", email));
+            mimeMessage.Subject = subject;
+            mimeMessage.Body = new TextPart("html") { Text = message };
+
+            using var client = new SmtpClient();
+
+            // SỬA LỖI TẠI ĐÂY: Bỏ qua kiểm tra thu hồi chứng chỉ SSL để tránh lỗi Revocation trên Windows
+            client.CheckCertificateRevocation = false;
+
+            // Sử dụng cổng 587 với StartTls
+            await client.ConnectAsync(emailSettings["SmtpServer"], int.Parse(emailSettings["SmtpPort"]), SecureSocketOptions.StartTls);
+
+            await client.AuthenticateAsync(emailSettings["SenderEmail"], emailSettings["Password"]);
+            await client.SendAsync(mimeMessage);
+            await client.DisconnectAsync(true);
         }
 
         // ================= ĐĂNG XUẤT =================
