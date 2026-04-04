@@ -1,10 +1,7 @@
 ﻿@model AiLaTrieuPhu.Models.User
 @{
     Layout = null;
-}
-<!DOCTYPE html>
-<html lang="vi">
-<head>
+}<!DOCTYPE html><html lang="vi"><head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập - Ai Là Triệu Phú</title>
@@ -38,8 +35,18 @@
             text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
         }
         .btn-submit:hover { box-shadow: 0 0 20px #ffcc00; transform: scale(1.03); }
+
+        /* Nút đổi mật khẩu mới */
+        .btn-change-pass {
+            display: inline-block; width: 100%; padding: 10px; border-radius: 30px; 
+            border: 1px solid #ffcc00; background: rgba(255, 204, 0, 0.05); 
+            color: #ffcc00; font-size: 14px; font-weight: bold; cursor: pointer; 
+            transition: 0.3s; text-transform: uppercase; margin-top: 10px;
+            text-decoration: none; box-sizing: border-box;
+        }
+        .btn-change-pass:hover { background: #ffcc00; color: black; box-shadow: 0 0 15px #ffcc00; }
         
-        .links-container { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .links-container { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
         .register-link { color: #00d4ff; text-decoration: none; font-size: 15px; transition: 0.3s; }
         .register-link:hover { color: white; text-shadow: 0 0 5px #00d4ff; }
         
@@ -54,9 +61,7 @@
             color: #00ffcc; margin-bottom: 15px; font-weight: bold; 
             background: rgba(0,255,204,0.1); padding: 10px; border-radius: 8px; border: 1px solid #00ffcc;
         }
-    </style>
-</head>
-<body>
+    </style></head><body>
     <div class="login-box">
         <div style="width: 65px; height: 65px; border: 3px solid #ffcc00; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 35px; color: #ffcc00; box-shadow: 0 0 15px #ffcc00; font-weight: bold;">?</div>
         <h2>Đăng Nhập</h2>
@@ -84,11 +89,13 @@
             </div>
 
             <button type="submit" class="btn-submit">VÀO TRƯỜNG QUAY</button>
+            
+            <a href="/Account/ChangePassword" class="btn-change-pass">
+                <i class="fas fa-key"></i> Đổi mật khẩu
+            </a>
         </form>
 
         <div class="links-container">
             <a href="/Account/Register" class="register-link">Chưa có vé? Đăng ký ngay</a>
         </div>
-    </div>
-</body>
-</html>
+    </div></body></html>

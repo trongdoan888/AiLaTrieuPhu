@@ -25,20 +25,17 @@ namespace AiLaTrieuPhu.Controllers
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == username);
 
-            // Kiểm tra user tồn tại và khớp mật khẩu (dùng BCrypt)
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                // Kiểm tra trạng thái khóa tài khoản (trừ Admin)
                 if (user.IsLocked && user.Role != "Admin")
                 {
                     ViewBag.Error = "Tài khoản của bạn đã bị khóa bởi Quản trị viên!";
                     return View();
                 }
 
-                // Lưu thông tin vào Session
                 HttpContext.Session.SetInt32("UserId", user.Id);
                 HttpContext.Session.SetString("Role", user.Role);
-                HttpContext.Session.SetString("Username", user.Username); // Lưu thêm username để hiển thị UI
+                HttpContext.Session.SetString("Username", user.Username);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -53,7 +50,6 @@ namespace AiLaTrieuPhu.Controllers
         [HttpPost]
         public IActionResult Register(string username, string password, string email)
         {
-            // Kiểm tra trùng lặp Username hoặc Email
             if (_context.Users.Any(u => u.Username == username))
             {
                 ViewBag.Error = "Tên tài khoản đã tồn tại!";
@@ -69,7 +65,7 @@ namespace AiLaTrieuPhu.Controllers
             var user = new User
             {
                 Username = username,
-                Password = BCrypt.Net.BCrypt.HashPassword(password), // Hash mật khẩu
+                Password = BCrypt.Net.BCrypt.HashPassword(password),
                 Email = email,
                 Role = "User",
                 IsLocked = false,
@@ -83,13 +79,43 @@ namespace AiLaTrieuPhu.Controllers
             return View();
         }
 
+        // ================= CHỨC NĂNG MỚI: ĐỔI MẬT KHẨU (USER + PASS CŨ) =================
+
+        public IActionResult ChangePassword() => View();
+
+        [HttpPost]
+        public IActionResult ChangePassword(string username, string oldPassword, string newPassword)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
+            // Bước 1: Kiểm tra tài khoản và xác thực mật khẩu cũ
+            if (user == null || !BCrypt.Net.BCrypt.Verify(oldPassword, user.Password))
+            {
+                ViewBag.Error = "Tên tài khoản hoặc mật khẩu cũ không chính xác!";
+                return View();
+            }
+
+            // Bước 2: Kiểm tra độ dài mật khẩu mới
+            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6)
+            {
+                ViewBag.Error = "Mật khẩu mới phải có ít nhất 6 ký tự!";
+                return View();
+            }
+
+            // Bước 3: Cập nhật mật khẩu mới (Hash lại)
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.SaveChanges();
+
+            ViewBag.Success = "Đổi mật khẩu thành công! Hãy dùng mật khẩu mới để đăng nhập.";
+            return View();
+        }
+
         // ================= QUÊN MẬT KHẨU (YÊU CẦU USER + EMAIL) =================
         public IActionResult ForgotPassword() => View();
 
         [HttpPost]
         public IActionResult ResetPasswordRequest(string username, string email)
         {
-            // Kiểm tra khớp cả Tên tài khoản VÀ Email
             var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Email == email);
 
             if (user == null)
@@ -98,14 +124,12 @@ namespace AiLaTrieuPhu.Controllers
                 return View("ForgotPassword");
             }
 
-            // Bảo mật cho Admin
             if (user.Role == "Admin")
             {
                 ViewBag.Error = "Không thể tự động reset mật khẩu cho quản trị viên!";
                 return View("ForgotPassword");
             }
 
-            // Reset về mật khẩu mặc định và Hash lại
             user.Password = BCrypt.Net.BCrypt.HashPassword("123456");
             _context.SaveChanges();
 
@@ -120,7 +144,6 @@ namespace AiLaTrieuPhu.Controllers
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return Unauthorized();
 
-            // Kiểm tra email mới có bị trùng với ai khác không
             if (_context.Users.Any(u => u.Email == email && u.Id != userId))
             {
                 return BadRequest(new { message = "Email này đã được sử dụng!" });

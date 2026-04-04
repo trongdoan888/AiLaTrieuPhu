@@ -35,15 +35,43 @@ namespace AiLaTrieuPhu.Controllers
             return View();
         }
 
-        // ================= QUẢN LÝ CÂU HỎI =================
+        // ================= QUẢN LÝ CÂU HỎI (CẬP NHẬT TÌM KIẾM & LỌC) =================
 
-        public IActionResult Questions()
+        public IActionResult Questions(string searchContent, string category, int? level)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
-            var questions = _context.Questions
+
+            var query = _context.Questions.AsQueryable();
+
+            // 1. Tìm kiếm theo từ khóa nội dung
+            if (!string.IsNullOrEmpty(searchContent))
+            {
+                query = query.Where(q => q.Content.Contains(searchContent));
+                ViewBag.SearchContent = searchContent;
+            }
+
+            // 2. Lọc theo lĩnh vực
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(q => q.Category == category);
+                ViewBag.CurrentCategory = category;
+            }
+
+            // 3. Lọc theo cấp độ (Level)
+            if (level.HasValue)
+            {
+                query = query.Where(q => q.Level == level.Value);
+                ViewBag.CurrentLevel = level;
+            }
+
+            // Danh sách Category để hiển thị ở Dropdown ngoài View
+            ViewBag.Categories = new List<string> { "Toán học", "Văn học", "Khoa học tự nhiên", "Khoa học xã hội" };
+
+            var questions = query
                 .OrderBy(q => q.Category)
                 .ThenBy(q => q.Level)
                 .ToList();
+
             return View(questions);
         }
 
@@ -149,14 +177,49 @@ namespace AiLaTrieuPhu.Controllers
 
         // ================= QUẢN LÝ TÀI KHOẢN =================
 
-        public IActionResult Users()
+        public IActionResult Users(string searchTerm)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
-            var users = _context.Users.OrderByDescending(u => u.CreatedAt).ToList();
+
+            var query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(u => u.Username.Contains(searchTerm));
+                ViewBag.SearchTerm = searchTerm;
+            }
+
+            var users = query.OrderByDescending(u => u.CreatedAt).ToList();
             return View(users);
         }
 
-        // --- CHỨC NĂNG MỚI: KHÓA / MỞ KHÓA TÀI KHOẢN ---
+        [HttpPost]
+        public IActionResult ChangePassword(int id, string newPassword)
+        {
+            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+            var user = _context.Users.Find(id);
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+
+            if (user != null && user.Id != currentUserId && user.Role != "Admin")
+            {
+                if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+                {
+                    TempData["Error"] = "Mật khẩu mới phải có ít nhất 6 ký tự!";
+                    return RedirectToAction("Users");
+                }
+
+                user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                _context.SaveChanges();
+                TempData["Success"] = $"Đã cập nhật mật khẩu cho {user.Username}!";
+            }
+            else
+            {
+                TempData["Error"] = "Không thể đổi mật khẩu tài khoản quản trị!";
+            }
+            return RedirectToAction("Users");
+        }
+
         public IActionResult ToggleLockUser(int id)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
@@ -164,7 +227,6 @@ namespace AiLaTrieuPhu.Controllers
             var user = _context.Users.Find(id);
             var currentUserId = HttpContext.Session.GetInt32("UserId");
 
-            // Không cho phép tự khóa chính mình và không khóa tài khoản Admin khác (nếu cần bảo mật)
             if (user != null && user.Id != currentUserId && user.Role != "Admin")
             {
                 user.IsLocked = !user.IsLocked;
@@ -173,7 +235,7 @@ namespace AiLaTrieuPhu.Controllers
             }
             else
             {
-                TempData["Error"] = "Không thể thực hiện thao tác này trên tài khoản quản trị!";
+                TempData["Error"] = "Thao tác không hợp lệ trên tài khoản quản trị!";
             }
 
             return RedirectToAction("Users");

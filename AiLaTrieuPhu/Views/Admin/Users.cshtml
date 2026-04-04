@@ -5,109 +5,77 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <title>Quản lý Người chơi - Admin</title>
+    <title>Quản lý Tài khoản - Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+        body { background: #020813; color: white; font-family: 'Rajdhani', sans-serif; padding: 30px; margin: 0; }
         
-        body { background: #020813; color: white; font-family: 'Rajdhani', 'Segoe UI', sans-serif; padding: 30px; margin: 0; }
-        
-        /* Table Styles */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: rgba(10, 31, 68, 0.6); border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        /* Search Bar Styles */
+        .search-bar { margin-bottom: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px solid rgba(0, 212, 255, 0.2); }
+        .search-input { flex: 1; background: #051024; border: 1px solid #00d4ff; border-radius: 8px; padding: 10px 15px; color: white; outline: none; }
+        .btn-search { background: #00d4ff; color: black; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        table { width: 100%; border-collapse: collapse; background: rgba(10, 31, 68, 0.6); border-radius: 10px; overflow: hidden; }
         th, td { border: 1px solid rgba(0, 212, 255, 0.1); padding: 15px; text-align: left; }
-        th { background: rgba(0,212,255,0.2); color: #ffcc00; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; }
+        th { background: rgba(0,212,255,0.2); color: #ffcc00; text-transform: uppercase; }
         tr:hover { background: rgba(0, 212, 255, 0.1); }
         
-        /* Button Styles */
-        .btn { padding: 8px 12px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; border: none; cursor: pointer; font-family: inherit; }
-        .btn-delete { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d; }
-        .btn-delete:hover { background: #ff4d4d; color: white; box-shadow: 0 0 10px #ff4d4d; }
+        .btn { padding: 8px 12px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: inherit; }
+        .btn-change-pass { background: rgba(0, 212, 255, 0.2); color: #00d4ff; border: 1px solid #00d4ff; }
+        .btn-lock { background: rgba(255, 153, 0, 0.2); color: #ff9900; border: 1px solid #ff9900; }
+        .btn-unlock { background: rgba(0, 255, 204, 0.2); color: #00ffcc; border: 1px solid #00ffcc; }
+        .btn-delete { background: rgba(255, 77, 77, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d; }
         
-        .btn-lock { background: rgba(255, 153, 0, 0.1); color: #ff9900; border: 1px solid #ff9900; }
-        .btn-lock:hover { background: #ff9900; color: white; box-shadow: 0 0 10px #ff9900; }
-        
-        .btn-unlock { background: rgba(0, 255, 204, 0.1); color: #00ffcc; border: 1px solid #00ffcc; }
-        .btn-unlock:hover { background: #00ffcc; color: black; box-shadow: 0 0 10px #00ffcc; }
-
-        .btn-disabled { background: transparent; color: #555; border: 1px solid #333; cursor: not-allowed; opacity: 0.6; }
-
-        /* Role & Status Styles */
-        .role-admin { color: #ffcc00; font-weight: bold; border: 1px solid #ffcc00; padding: 3px 10px; border-radius: 4px; font-size: 12px; background: rgba(255, 204, 0, 0.1); }
-        .role-user { color: #00d4ff; }
-        .status-locked { color: #ff4d4d; font-weight: bold; animation: blink 1.5s infinite; }
-        
-        .password-cell { font-family: 'Courier New', monospace; font-size: 12px; color: #888; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .password-cell:hover { white-space: normal; color: #ccc; word-break: break-all; }
-
-        .btn-back { color: #00d4ff; text-decoration: none; font-size: 16px; display: inline-block; margin-bottom: 20px; transition: 0.3s; font-weight: 600; }
-        .btn-back:hover { text-shadow: 0 0 10px #00d4ff; transform: translateX(-5px); }
-
-        @@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .btn-back { color: #00d4ff; text-decoration: none; display: inline-block; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <a href="/Admin/Index" class="btn-back"><i class="fas fa-arrow-left"></i> TRỞ VỀ DASHBOARD</a>
     
-    <h2 style="color: #ffcc00; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">
-        <i class="fas fa-users-cog"></i> Quản lý Tài khoản Người chơi
-    </h2>
+    <h2 style="color: #ffcc00;"><i class="fas fa-users-cog"></i> QUẢN LÝ TÀI KHOẢN</h2>
 
-    @if (TempData["Success"] != null)
-    {
-        <div style="background: rgba(0, 255, 204, 0.1); color: #00ffcc; padding: 10px; margin-bottom: 20px; border: 1px solid #00ffcc; border-radius: 5px;">
-            <i class="fas fa-check-circle"></i> @TempData["Success"]
-        </div>
-    }
+    <form method="get" action="/Admin/Users" class="search-bar">
+        <input type="text" name="searchTerm" class="search-input" placeholder="Tìm kiếm tên tài khoản..." value="@ViewBag.SearchTerm">
+        <button type="submit" class="btn-search"><i class="fas fa-search"></i> TÌM KIẾM</button>
+        @if(!string.IsNullOrEmpty(ViewBag.SearchTerm)) {
+            <a href="/Admin/Users" class="btn" style="background:#555; color:white; line-height:35px; padding:0 15px;">Hủy</a>
+        }
+    </form>
+
+    @if (TempData["Success"] != null) { <div style="color: #00ffcc; margin-bottom: 15px;">@TempData["Success"]</div> }
+    @if (TempData["Error"] != null) { <div style="color: #ff4d4d; margin-bottom: 15px;">@TempData["Error"]</div> }
 
     <table>
         <thead>
             <tr>
-                <th width="50">ID</th>
-                <th width="150">Tên tài khoản</th>
-                <th>Mật khẩu (Mã hóa)</th>
-                <th width="120">Vai trò</th>
-                <th width="120">Trạng thái</th>
-                <th width="280">Thao tác</th>
+                <th>ID</th>
+                <th>Tên tài khoản</th>
+                <th>Email</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var u in Model)
             {
                 <tr>
-                    <td style="opacity: 0.5;">#@u.Id</td>
-                    <td style="font-weight: bold; font-size: 18px; color: #fff;">@u.Username</td>
+                    <td>#@u.Id</td>
+                    <td style="font-weight: bold;">@u.Username</td>
+                    <td>@u.Email</td>
                     <td>
-                        <div class="password-cell" title="@u.Password">
-                            @if (u.Role == "Admin") { <span>********</span> } else { @u.Password }
-                        </div>
+                        @if (u.IsLocked) { <span style="color: #ff4d4d;">BỊ KHÓA</span> }
+                        else { <span style="color: #00ffcc;">Hoạt động</span> }
                     </td>
                     <td>
-                        @if(u.Role == "Admin") { <span class="role-admin">ADMIN</span> }
-                        else { <span class="role-user">USER</span> }
-                    </td>
-                    <td>
-                        @if (u.IsLocked) { <span class="status-locked"><i class="fas fa-user-slash"></i> BỊ KHÓA</span> }
-                        else { <span style="color: #00ffcc;"><i class="fas fa-user-check"></i> OK</span> }
-                    </td>
-                    <td>
-                        @if (u.Id == Context.Session.GetInt32("UserId"))
+                        @if (u.Role != "Admin")
                         {
-                            <span class="btn btn-disabled"><i class="fas fa-crown"></i> Đang là bạn</span>
-                        }
-                        else if (u.Role == "Admin")
-                        {
-                            <span class="btn btn-disabled"><i class="fas fa-shield-alt"></i> Bảo vệ Admin</span>
-                        }
-                        else
-                        {
+                            <button onclick="openChangePassModal(@u.Id, '@u.Username')" class="btn btn-change-pass"><i class="fas fa-key"></i> Đổi Pass</button>
                             <a href="/Admin/ToggleLockUser/@u.Id" class="btn @(u.IsLocked ? "btn-unlock" : "btn-lock")">
-                                <i class="fas @(u.IsLocked ? "fa-lock-open" : "fa-lock")"></i> 
-                                @(u.IsLocked ? "Mở khóa" : "Khóa tài khoản")
+                                <i class="fas @(u.IsLocked ? "fa-unlock" : "fa-lock")"></i>
                             </a>
-
-                            <a href="/Admin/DeleteUser/@u.Id" class="btn btn-delete" 
-                               onclick="return confirm('CẢNH BÁO: Xóa tài khoản @u.Username?');">
-                               <i class="fas fa-trash-alt"></i> Xóa
+                            <a href="/Admin/DeleteUser/@u.Id" class="btn btn-delete" onclick="return confirm('Xóa vĩnh viễn tài khoản này?');">
+                                <i class="fas fa-trash-alt"></i>
                             </a>
                         }
                     </td>
@@ -115,5 +83,45 @@
             }
         </tbody>
     </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // CHỨC NĂNG ĐỔI MẬT KHẨU BẰNG POPUP
+        async function openChangePassModal(id, username) {
+            const { value: password } = await Swal.fire({
+                title: 'Đổi mật khẩu cho ' + username,
+                input: 'password',
+                inputLabel: 'Nhập mật khẩu mới',
+                inputPlaceholder: 'Tối thiểu 6 ký tự',
+                showCancelButton: true,
+                background: '#051024',
+                color: '#fff',
+                confirmButtonColor: '#00d4ff'
+            });
+
+            if (password) {
+                if (password.length < 6) {
+                    Swal.fire('Lỗi', 'Mật khẩu quá ngắn!', 'error');
+                    return;
+                }
+                
+                // Gửi form ẩn lên server
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/Admin/ChangePassword';
+                
+                const idInput = document.createElement('input');
+                idInput.name = 'id'; idInput.value = id;
+                form.appendChild(idInput);
+                
+                const passInput = document.createElement('input');
+                passInput.name = 'newPassword'; passInput.value = password;
+                form.appendChild(passInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
 </body>
 </html>
