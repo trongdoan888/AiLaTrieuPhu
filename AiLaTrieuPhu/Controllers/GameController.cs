@@ -12,15 +12,19 @@ namespace AiLaTrieuPhu.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        // Giữ nguyên các mốc tiền thưởng cũ của bạn
-        private readonly int[] moneyMilestones = { 0, 200, 400, 600, 1000, 2000, 3000, 6000, 10000, 14000, 22000, 30000, 40000, 60000, 85000, 150000 };
+        // Mảng tiền thưởng 2 Tỷ đã được cập nhật
+        private readonly long[] moneyLadder = {
+            1000000, 2000000, 3000000, 5000000, 10000000,
+            20000000, 35000000, 60000000, 100000000, 250000000,
+            500000000, 800000000, 1200000000, 1600000000, 2000000000
+        };
 
         public GameController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // ================= CHỨC NĂNG MỚI: CHỌN LĨNH VỰC =================
+        // ================= CHỌN LĨNH VỰC =================
         public IActionResult ChooseCategory()
         {
             if (HttpContext.Session.GetInt32("UserId") == null)
@@ -28,8 +32,7 @@ namespace AiLaTrieuPhu.Controllers
 
             int currentLevel = HttpContext.Session.GetInt32("CurrentLevel") ?? 1;
 
-            // --- TÍNH NĂNG MỚI: HỒI TRỢ GIÚP TẠI MỐC 5 VÀ 10 ---
-            // Khi bắt đầu câu 6 (vừa qua mốc 5) hoặc câu 11 (vừa qua mốc 10)
+            // HỒI TRỢ GIÚP TẠI MỐC 5 VÀ 10
             if (currentLevel == 6 || currentLevel == 11)
             {
                 HttpContext.Session.Remove("Used_5050");
@@ -47,7 +50,6 @@ namespace AiLaTrieuPhu.Controllers
             if (HttpContext.Session.GetInt32("UserId") == null)
                 return RedirectToAction("Login", "Account");
 
-            // Nếu chưa chọn lĩnh vực, bắt quay lại trang chọn
             if (string.IsNullOrEmpty(category))
                 return RedirectToAction("ChooseCategory");
 
@@ -57,14 +59,15 @@ namespace AiLaTrieuPhu.Controllers
             {
                 HttpContext.Session.SetInt32("Score", 0);
                 HttpContext.Session.SetInt32("TotalTime", 0);
-                HttpContext.Session.SetInt32("Money", 0);
-                // Level 1 thì reset trợ giúp (đề phòng ván trước còn sót)
+
+                // Lưu tiền dạng String để tránh lỗi tràn số (Overflow)
+                HttpContext.Session.SetString("Money", "0");
+
                 HttpContext.Session.Remove("Used_5050");
                 HttpContext.Session.Remove("Used_Call");
                 HttpContext.Session.Remove("Used_Audience");
             }
 
-            // --- TÍNH NĂNG MỚI: LẤY CÂU HỎI THEO LEVEL + CATEGORY ---
             var question = _context.Questions
                 .Where(q => q.Level == currentLevel && q.Category == category)
                 .OrderBy(q => Guid.NewGuid())
@@ -75,11 +78,14 @@ namespace AiLaTrieuPhu.Controllers
                 return RedirectToAction("EndGame", new { reason = "win" });
             }
 
-            // Giữ nguyên các ViewBag cũ để hiển thị giao diện
+            // Đọc tiền từ Session
+            long currentMoney = 0;
+            long.TryParse(HttpContext.Session.GetString("Money"), out currentMoney);
+
             ViewBag.Score = HttpContext.Session.GetInt32("Score") ?? 0;
-            ViewBag.Money = HttpContext.Session.GetInt32("Money") ?? 0;
+            ViewBag.Money = currentMoney;
             ViewBag.CurrentLevel = currentLevel;
-            ViewBag.Category = category; // Gửi category qua để hiển thị trên UI
+            ViewBag.Category = category;
 
             ViewBag.Used5050 = HttpContext.Session.GetString("Used_5050") == "true";
             ViewBag.UsedCall = HttpContext.Session.GetString("Used_Call") == "true";
@@ -107,22 +113,23 @@ namespace AiLaTrieuPhu.Controllers
             if (dbAnswer == userAnswer)
             {
                 int score = (HttpContext.Session.GetInt32("Score") ?? 0) + 200;
-                int money = currentLevel < moneyMilestones.Length ? moneyMilestones[currentLevel] : moneyMilestones.Last();
+
+                // ĐÃ SỬA: Lấy đúng số tiền từ mảng moneyLadder
+                long currentReward = moneyLadder[currentLevel - 1];
 
                 currentLevel++;
 
                 if (currentLevel > 15)
                 {
                     HttpContext.Session.SetInt32("Score", score);
-                    HttpContext.Session.SetInt32("Money", moneyMilestones[15]);
+                    HttpContext.Session.SetString("Money", currentReward.ToString());
                     return RedirectToAction("EndGame", new { reason = "win" });
                 }
 
                 HttpContext.Session.SetInt32("CurrentLevel", currentLevel);
                 HttpContext.Session.SetInt32("Score", score);
-                HttpContext.Session.SetInt32("Money", money);
+                HttpContext.Session.SetString("Money", currentReward.ToString()); // Lưu tiền mới
 
-                // TRẢ LỜI ĐÚNG -> QUAY VỀ CHỌN LĨNH VỰC CHO CÂU TIẾP THEO
                 return RedirectToAction("ChooseCategory");
             }
             else
@@ -131,7 +138,6 @@ namespace AiLaTrieuPhu.Controllers
             }
         }
 
-        // Hàm EndGame và UseLifeline giữ nguyên 100% code cũ của bạn
         public IActionResult EndGame(string reason = "quit")
         {
             int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
@@ -140,15 +146,19 @@ namespace AiLaTrieuPhu.Controllers
             int score = HttpContext.Session.GetInt32("Score") ?? 0;
             int levelReached = (HttpContext.Session.GetInt32("CurrentLevel") ?? 1);
             int totalTime = HttpContext.Session.GetInt32("TotalTime") ?? 0;
-            long money = HttpContext.Session.GetInt32("Money") ?? 0;
+
+            // Đọc tiền từ Session
+            long money = 0;
+            long.TryParse(HttpContext.Session.GetString("Money"), out money);
 
             if (reason == "timeout") totalTime += 60;
 
+            // ĐÃ SỬA: Tính toán rớt mốc dựa trên mảng moneyLadder (Mốc 5 là index 4, Mốc 10 là index 9)
             if (reason == "lose" || reason == "timeout")
             {
-                if (levelReached >= 10) money = moneyMilestones[10];
-                else if (levelReached >= 5) money = moneyMilestones[5];
-                else money = 0;
+                if (levelReached > 10) money = moneyLadder[9]; // Rớt về mốc 10 (250 triệu)
+                else if (levelReached > 5) money = moneyLadder[4]; // Rớt về mốc 5 (10 triệu)
+                else money = 0; // Trắng tay
             }
 
             try
@@ -183,7 +193,7 @@ namespace AiLaTrieuPhu.Controllers
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); }
 
-            // Xóa Session sau khi kết thúc
+            // Xóa Session
             HttpContext.Session.Remove("CurrentLevel");
             HttpContext.Session.Remove("Score");
             HttpContext.Session.Remove("TotalTime");

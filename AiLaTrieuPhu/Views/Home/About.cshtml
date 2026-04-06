@@ -9,60 +9,130 @@
     <title>Luật Chơi - Ai Là Triệu Phú</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        body {
-            margin: 0; padding: 20px; min-height: 100vh;
-            background: radial-gradient(circle at top, #0a1f44 0%, #020813 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;
+        @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+            background-color: #030712;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 80%),
+                linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: white; 
         }
+
         .btn-home {
-            position: absolute; top: 20px; left: 20px; padding: 10px 20px; text-decoration: none;
-            background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; color: #00d4ff;
-            border-radius: 20px; transition: 0.3s; font-weight: bold;
+            position: fixed; top: 20px; left: 20px; padding: 12px 25px; text-decoration: none;
+            background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; color: #00d4ff;
+            border-radius: 8px; transition: 0.3s; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            z-index: 100; backdrop-filter: blur(5px);
         }
-        .btn-home:hover { background: #00d4ff; color: black; box-shadow: 0 0 10px #00d4ff; }
+        .btn-home:hover { background: #00d4ff; color: #000; box-shadow: 0 0 20px #00d4ff; }
         
-        .container { max-width: 800px; margin: 60px auto 0; background: rgba(0,0,0,0.6); border: 2px solid #00d4ff; border-radius: 20px; padding: 40px; box-shadow: 0 0 20px rgba(0,212,255,0.3); }
-        h1 { color: #ffcc00; text-align: center; text-transform: uppercase; margin-top: 0; margin-bottom: 30px; font-size: 32px; text-shadow: 0 0 10px #ffcc00; }
+        .container { 
+            max-width: 900px; margin: 80px auto 60px; 
+            background: rgba(6, 15, 30, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 212, 255, 0.3); border-top: 3px solid #00d4ff; 
+            border-radius: 20px; padding: 50px 60px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+        }
+
+        h1 { 
+            color: #ffcc00; text-align: center; text-transform: uppercase; 
+            margin-top: 0; margin-bottom: 20px; font-size: 42px; 
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.7); letter-spacing: 3px;
+        }
+
+        .subtitle {
+            text-align: center; color: #a1b0c9; font-size: 18px; margin-bottom: 50px;
+            font-style: italic; letter-spacing: 1px;
+        }
         
-        .rule-section { margin-bottom: 25px; }
-        .rule-section h3 { color: #00d4ff; border-bottom: 1px solid #00d4ff; padding-bottom: 10px; }
-        .rule-section ul { line-height: 1.8; font-size: 16px; padding-left: 20px; }
-        .rule-section li { margin-bottom: 10px; }
-        .highlight { color: #ffcc00; font-weight: bold; }
+        .rule-section { 
+            margin-bottom: 40px; background: rgba(0, 0, 0, 0.4); 
+            padding: 30px; border-radius: 15px; border-left: 5px solid #00d4ff; 
+            transition: all 0.3s ease;
+        }
+        .rule-section:hover { background: rgba(0, 212, 255, 0.05); border-left-color: #ffcc00; transform: translateX(5px); }
+
+        .rule-section h3 { 
+            color: #00ffcc; border-bottom: 1px solid rgba(0, 212, 255, 0.2); 
+            padding-bottom: 15px; margin-top: 0; font-size: 26px; text-transform: uppercase; 
+            letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
+        }
+        
+        .rule-section p { line-height: 1.8; font-size: 18px; color: #d0dbe8; margin-bottom: 15px; text-align: justify;}
+        .rule-section ul { line-height: 1.9; font-size: 18px; padding-left: 25px; color: #d0dbe8; margin-bottom: 0; }
+        .rule-section li { margin-bottom: 15px; text-align: justify; }
+        
+        .highlight { color: #ffcc00; font-weight: 700; text-shadow: 0 0 8px rgba(255,204,0,0.4); }
+        .highlight-blue { color: #00d4ff; font-weight: 700; text-shadow: 0 0 8px rgba(0,212,255,0.4); }
+        .highlight-red { color: #ff4d4d; font-weight: 700; text-shadow: 0 0 8px rgba(255,77,77,0.4); }
+        
+        .warning-box {
+            background: rgba(255, 204, 0, 0.1); border: 1px dashed #ffcc00;
+            padding: 20px; border-radius: 10px; margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <a href="/Home/Index" class="btn-home"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
     
     <div class="container">
-        <h1>Luật Chơi Của Chương Trình</h1>
+        <h1><i class="fas fa-globe"></i> Cẩm Nang Điện Tử</h1>
+        <div class="subtitle">"Đọc kỹ hướng dẫn trước khi bước lên ghế nóng Cyber-Millionaire"</div>
         
         <div class="rule-section">
-            <h3><i class="fas fa-list-ol"></i> Thể thức cơ bản</h3>
+            <h3><i class="fas fa-list-ol"></i> 1. Thể thức thi đấu & Áp lực thời gian</h3>
+            <p>Đấu trường trí tuệ được thiết kế với độ khó tăng dần, đòi hỏi người chơi không chỉ có kiến thức uyên thâm mà còn phải có tinh thần thép.</p>
             <ul>
-                <li>Người chơi phải vượt qua <span class="highlight">15 câu hỏi</span> trắc nghiệm khách quan.</li>
-                <li>Mỗi câu hỏi có 4 phương án trả lời (A, B, C, D) và chỉ có <span class="highlight">1 phương án đúng duy nhất</span>.</li>
-                <li>Bạn có tối đa <span class="highlight">60 giây</span> để suy nghĩ và đưa ra đáp án cho mỗi câu. Trả lời sai hoặc hết giờ, trò chơi sẽ kết thúc.</li>
+                <li><strong>Hành trình 15 bước:</strong> Bạn phải vượt qua tổng cộng <span class="highlight">15 câu hỏi</span> trắc nghiệm. Mỗi câu có 4 phương án (A, B, C, D) và chỉ có duy nhất 1 phương án chính xác.</li>
+                <li><strong>Quyền làm chủ cuộc chơi:</strong> Trước khi bước vào mỗi câu hỏi, hệ thống cho phép bạn tự do <span class="highlight-blue">chọn 1 trong 4 lĩnh vực</span> (Toán học, Văn học, Khoa học Tự nhiên, Khoa học Xã hội) để tối ưu hóa thế mạnh của bản thân.</li>
+                <li><strong>Đồng hồ tử thần:</strong> Bất kể câu hỏi ở mức độ nào, bạn chỉ có tối đa <span class="highlight-red">60 giây</span> để suy nghĩ. Nếu đồng hồ đếm ngược về 0 mà bạn chưa đưa ra quyết định, hệ thống sẽ tự động vô hiệu hóa bài thi và bạn bị tính là thua cuộc.</li>
+                <li><strong>Xác nhận kép:</strong> Trò chơi áp dụng cơ chế xác nhận chống bấm nhầm. Khi bạn chọn một đáp án, hệ thống sẽ hỏi lại một lần nữa. Bạn hoàn toàn có thể bấm <span class="highlight-blue">"Để tôi nghĩ lại"</span> để chọn đáp án khác hoặc dùng quyền trợ giúp nếu vẫn còn thời gian.</li>
             </ul>
         </div>
 
         <div class="rule-section">
-            <h3><i class="fas fa-money-bill-wave"></i> Điểm và Tiền thưởng</h3>
+            <h3><i class="fas fa-sack-dollar"></i> 2. Thang tiền thưởng & Cơ chế Rớt đài</h3>
+            <p>Hệ thống phần thưởng được thiết kế cực kỳ hậu hĩnh nhưng đi kèm với rủi ro khổng lồ nếu bạn quyết định "tham bát bỏ mâm".</p>
             <ul>
-                <li>Mỗi câu trả lời đúng, bạn sẽ được cộng thêm <span class="highlight">200 điểm</span>.</li>
-                <li>Vượt qua 15 câu hỏi, bạn sẽ giành giải thưởng cao nhất trị giá <span class="highlight">150.000.000 VNĐ</span>.</li>
-                <li>Nếu trả lời sai, bạn sẽ ra về với phần thưởng là <span class="highlight">0 VNĐ</span> (Trừ khi bạn chọn "Dừng chơi" trước khi xem đáp án).</li>
+                <li><strong>Giải thưởng tối thượng:</strong> Trả lời đúng toàn bộ 15 câu hỏi, bạn sẽ trở thành Triệu Phú Đích Thực với số tiền thưởng lên tới <span class="highlight">2.000.000.000 VNĐ</span> (Hai Tỷ Đồng).</li>
+                <li><strong>3 Cột mốc bất tử:</strong> Trên hành trình 15 câu, có 3 mốc quan trọng bạn cần ghi nhớ: <span class="highlight-blue">Câu 5 (10.000.000 VNĐ)</span>, <span class="highlight-blue">Câu 10 (250.000.000 VNĐ)</span> và Câu 15. Một khi đã vượt qua các mốc này, số tiền tương ứng sẽ thuộc về bạn vĩnh viễn dù sau đó bạn có trả lời sai.</li>
+                <li><strong>Cơ chế Rớt đài:</strong> Nếu bạn trả lời sai ở một câu bất kỳ, bạn sẽ bị tước toàn bộ số tiền đang có ở câu đó và rơi thẳng xuống <span class="highlight-red">mốc an toàn gần nhất</span>. Ví dụ: Nếu sai ở câu 14, bạn sẽ mất trắng số tiền 1,2 Tỷ và bị rớt về mốc số 10 (Chỉ mang về 250 Triệu VNĐ).</li>
+                <li><strong>Quyền Bảo toàn (Dừng chơi):</strong> Nếu cảm thấy câu hỏi quá sức, bạn có quyền bấm nút <span class="highlight-blue">DỪNG CHƠI</span> ở góc trái màn hình. Bạn sẽ ra về an toàn với chính xác số tiền thưởng của câu hỏi mà bạn vừa trả lời đúng trước đó.</li>
             </ul>
         </div>
 
         <div class="rule-section">
-            <h3><i class="fas fa-life-ring"></i> Các quyền trợ giúp</h3>
+            <h3><i class="fas fa-microchip"></i> 3. Hệ thống Trợ giúp (Lifelines)</h3>
+            <p>Khi lâm vào bế tắc, bạn có 4 phao cứu sinh. Hãy sử dụng chúng một cách khôn ngoan vì chúng là chìa khóa để tiến sâu hơn.</p>
             <ul>
-                <li><strong>50/50:</strong> Máy tính sẽ loại bỏ đi 2 phương án sai.</li>
-                <li><strong>Gọi điện thoại cho người thân:</strong> Nhận gợi ý đáp án trực tiếp từ bạn bè.</li>
-                <li><strong>Hỏi ý kiến khán giả trong trường quay:</strong> Xem biểu đồ bình chọn của khán giả để đưa ra quyết định.</li>
-                <li>Mỗi quyền trợ giúp chỉ được sử dụng <span class="highlight">duy nhất 1 lần</span> trong suốt quá trình chơi.</li>
+                <li><strong><i class="fas fa-star-half-alt"></i> Trợ giúp 50/50:</strong> Thuật toán máy chủ sẽ can thiệp và gạch bỏ ngay lập tức 2 phương án sai, để lại cho bạn 1 đáp án đúng và 1 đáp án gây nhiễu.</li>
+                <li><strong><i class="fas fa-phone-alt"></i> Gọi điện thoại cho người thân:</strong> Kết nối sóng tín hiệu đến tổ tư vấn chuyên gia của bạn để nhận về một gợi ý mang tính tham khảo.</li>
+                <li><strong><i class="fas fa-users"></i> Hỏi ý kiến khán giả:</strong> Kích hoạt hệ thống lấy ý kiến trực tiếp từ hàng trăm khán giả đang theo dõi tại trường quay ảo.</li>
+                <li><strong><i class="fas fa-lightbulb"></i> Giải mã Gợi ý (Hint):</strong> Đọc một dòng thông tin gợi ý ẩn được đính kèm sẵn trong tệp dữ liệu của câu hỏi.</li>
             </ul>
+            <div class="warning-box">
+                <i class="fas fa-bolt" style="font-size: 20px; color: #ffcc00; margin-right: 10px;"></i>
+                <span style="font-size: 18px;"><strong>CƠ CHẾ ĐẶC QUYỀN: HỒI CHIÊU TRỢ GIÚP</strong></span><br>
+                <span style="color: #d0dbe8; font-size: 16px;">Khác với luật chơi truyền thống, trong hệ thống của chúng tôi, toàn bộ các quyền trợ giúp đã sử dụng sẽ được <span class="highlight">HỒI PHỤC HOÀN TOÀN (Reset)</span> ngay sau khi bạn xuất sắc vượt qua cột mốc số 5 và cột mốc số 10. Đừng ngại "bung lụa" trợ giúp ở những câu đầu tiên nhé!</span>
+            </div>
+        </div>
+
+        <div class="rule-section">
+            <h3><i class="fas fa-trophy"></i> 4. Hệ thống Vinh Danh Bảng Vàng</h3>
+            <p>Mọi nỗ lực của bạn đều được ghi nhận vào cơ sở dữ liệu và xếp hạng vinh danh với toàn bộ cộng đồng người chơi.</p>
+            <ul>
+                <li><strong>Điểm số (Score):</strong> Cứ mỗi câu trả lời đúng, bạn sẽ được cộng <span class="highlight">200 Điểm</span> vào hồ sơ. Vượt qua 15 câu, bạn nhận được tối đa 3000 Điểm.</li>
+                <li><strong>Bảng Cao Thủ Siêu Tốc:</strong> Xếp hạng những cá nhân xuất sắc nhất dựa trên <span class="highlight-blue">Số điểm cao nhất</span>. Nếu có nhiều người bằng điểm nhau, hệ thống sẽ ưu tiên người có <span class="highlight-blue">Tổng thời gian suy nghĩ ít nhất</span>. Đặc biệt, bảng này chỉ lấy kỷ lục tốt nhất duy nhất của mỗi tài khoản.</li>
+                <li><strong>Bảng Đại Gia Triệu Phú:</strong> Không cần điểm cao hay tốc độ, bảng này vinh danh những người chơi chăm chỉ nhất dựa trên <span class="highlight">Tổng số tiền thưởng tích lũy</span> từ tất cả các lần tham gia cuộc chơi.</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 50px;">
+            <p style="color: #ffcc00; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Chúc bạn may mắn và trở thành Triệu Phú tiếp theo!</p>
         </div>
     </div>
 </body>

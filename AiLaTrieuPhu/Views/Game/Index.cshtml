@@ -2,7 +2,12 @@
 @{
     Layout = null;    
     int currentLevel = ViewBag.CurrentLevel ?? 1;
-    int[] moneyLadder = { 200, 400, 600, 1000, 2000, 3000, 6000, 10000, 14000, 22000, 30000, 40000, 60000, 85000, 150000 };
+    // 1. NÂNG CẤP THANG TIỀN LỚN (Đơn vị: VNĐ)
+    long[] moneyLadder = { 
+        1000000, 2000000, 3000000, 5000000, 10000000, 
+        20000000, 35000000, 60000000, 100000000, 250000000, 
+        500000000, 800000000, 1200000000, 1600000000, 2000000000 
+    };
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -15,10 +20,9 @@
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
 
-        /* ================= NỀN LƯỚI KHÔNG GIAN ĐỒNG BỘ ================= */
         body, html {
             margin: 0; padding: 0; min-height: 100vh;
-            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+            font-family: 'Rajdhani', sans-serif;
             background-color: #030712;
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 80%),
@@ -55,58 +59,18 @@
             font-size: 35px; font-weight: bold; box-shadow: 0 0 20px #00d4ff;
         }
 
-        .level-info-container { text-align: right; }
-        .badge-level { font-size: 26px; font-weight: 700; color: #ffcc00; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,204,0,0.5); margin-bottom: 5px; }
-        .badge-money { font-size: 18px; color: #a1b0c9; font-weight: 600; }
-        .badge-money span { color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.5); font-size: 20px;}
-
         .main-game-layout {
             display: flex; gap: 40px; max-width: 1400px; width: 100%; margin: 0 auto; 
             padding: 30px; flex: 1; align-items: flex-end; justify-content: center;
         }
         
-        .game-content {
-            flex: 1; max-width: 900px; display: flex; flex-direction: column; justify-content: flex-end;
-        }
+        .game-content { flex: 1; max-width: 900px; display: flex; flex-direction: column; justify-content: flex-end; }
 
-        /* --- QUYỀN TRỢ GIÚP --- */
-        .lifelines { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
-        .lifeline-btn {
-            width: 70px; height: 50px; background: rgba(6, 15, 30, 0.8); backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 204, 0, 0.5); border-radius: 12px; color: #ffcc00;
-            font-size: 22px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(0,0,0,0.5);
-        }
-        .lifeline-btn:hover:not(.used) { background: #ffcc00; color: #000; box-shadow: 0 0 20px rgba(255,204,0,0.6); transform: translateY(-5px); }
-        .lifeline-btn.used { opacity: 0.2; pointer-events: none; border-color: red; color: red; }
-
-        /* --- CÂU HỎI VÀ ĐÁP ÁN --- */
-        .question-box {
-            background: rgba(6, 15, 30, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 2px solid rgba(0, 212, 255, 0.5); border-radius: 20px; padding: 30px 40px;
-            text-align: center; font-size: 26px; font-weight: 600; margin-bottom: 30px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,212,255,0.1);
-            animation: pulse-border 2s infinite alternate; letter-spacing: 1px;
-        }
-        
-        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .answer-btn {
-            background: rgba(6, 15, 30, 0.7); backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 15px; padding: 20px 30px;
-            color: white; font-size: 22px; text-align: left; cursor: pointer; transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3); position: relative; overflow: hidden; font-family: inherit; font-weight: 600;
-        }
-        .answer-btn span.letter { color: #ffcc00; font-weight: 700; margin-right: 15px; font-size: 24px;}
-        
-        .answer-btn:hover {
-            background: rgba(0, 212, 255, 0.1); border-color: #00d4ff;
-            box-shadow: 0 0 25px rgba(0, 212, 255, 0.3); transform: scale(1.02);
-        }
-
-        /* --- THANG TIỀN --- */
+        /* --- 2. THANG TIỀN VÀ MÀU SẮC MỐC 5-10-15 --- */
         .money-ladder-container {
             width: 320px; background: rgba(6, 15, 30, 0.6); backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 212, 255, 0.2); border-top: 1px solid rgba(0, 212, 255, 0.5);
-            border-radius: 20px; padding: 25px; display: flex; flex-direction: column; justify-content: space-between;
+            border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 20px; padding: 25px;
+            display: flex; flex-direction: column; justify-content: space-between;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5); height: 100%; max-height: 750px;
         }
 
@@ -114,10 +78,43 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 15px; border-radius: 8px; font-weight: 600; font-size: 18px; transition: 0.3s;
         }
-        .ladder-item.active { background: #ffcc00; color: #000; font-weight: 700; transform: scale(1.05); }
-        .ladder-item.passed { color: #00ffcc; opacity: 0.5; }
 
-        @@keyframes pulse-border { from { box-shadow: 0 0 10px rgba(0,212,255,0.2); } to { box-shadow: 0 0 25px rgba(0,212,255,0.5), inset 0 0 10px rgba(0,212,255,0.1); } }
+        /* Mốc quan trọng 5, 10, 15: Màu trắng rực rỡ và bóng vàng */
+        .ladder-item.milestone {
+            color: #ffffff;
+            text-shadow: 0 0 8px #ffcc00, 0 0 15px #ffcc00;
+            border: 1px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .ladder-item.active { background: #ffcc00; color: #000; font-weight: 700; transform: scale(1.05); box-shadow: 0 0 20px #ffcc00; }
+        .ladder-item.passed { color: #00ffcc; opacity: 0.5; }
+        .ladder-item.normal { color: #00d4ff; }
+
+        /* --- CÂU HỎI VÀ ĐÁP ÁN --- */
+        .question-box {
+            background: rgba(6, 15, 30, 0.7); backdrop-filter: blur(12px);
+            border: 2px solid rgba(0, 212, 255, 0.5); border-radius: 20px; padding: 30px 40px;
+            text-align: center; font-size: 26px; font-weight: 600; margin-bottom: 30px;
+        }
+        
+        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* ĐÃ ĐỔI TÊN CLASS THÀNH btn-dapan */
+        .btn-dapan {
+            background: rgba(6, 15, 30, 0.7); backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 15px; padding: 20px 30px;
+            color: white; font-size: 22px; text-align: left; cursor: pointer; transition: 0.3s;
+        }
+        .btn-dapan:hover { background: rgba(0, 212, 255, 0.1); border-color: #ffcc00; box-shadow: 0 0 25px rgba(255, 204, 0, 0.3); }
+        .btn-dapan span.letter { color: #ffcc00; font-weight: 700; margin-right: 15px; font-size: 24px;}
+
+        .lifelines { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+        .lifeline-btn {
+            width: 70px; height: 50px; background: rgba(6, 15, 30, 0.8);
+            border: 1px solid rgba(255, 204, 0, 0.5); border-radius: 12px; color: #ffcc00;
+            font-size: 22px; cursor: pointer; transition: 0.3s;
+        }
+        .lifeline-btn.used { opacity: 0.2; pointer-events: none; border-color: red; color: red; }
     </style>
 </head>
 <body>
@@ -129,41 +126,26 @@
     <div class="top-bar">
         <div style="display: flex; align-items: center;">
             <a href="#" class="btn-quit" id="btnQuitGame"><i class="fas fa-power-off"></i> Dừng chơi</a>
-            <button id="btnToggleSound" class="btn-sound" title="Bật/Tắt Nhạc"><i class="fas fa-volume-up"></i></button>
+            <button id="btnToggleSound" class="btn-sound"><i class="fas fa-volume-up"></i></button>
         </div>
-        
         <div class="timer-box" id="timer">60</div>
-        
-        <div class="level-info-container">
-            <div class="badge-level">CÂU @currentLevel / 15</div>
-            <div class="badge-money">
-                <i class="fas fa-star" style="color: #ffcc00;"></i> Điểm: @(ViewBag.Score ?? 0) &nbsp;|&nbsp; 
-                <i class="fas fa-sack-dollar" style="color: #00ffcc;"></i> Tiền: <span>@(String.Format("{0:N0}", ViewBag.Money ?? 0)) VNĐ</span>
-            </div>
+        <div style="text-align: right;">
+            <div style="color: #ffcc00; font-weight: 700; font-size: 24px;">CÂU @currentLevel / 15</div>
+            <div style="color: #00ffcc; font-size: 18px;">TIỀN: <span>@(String.Format("{0:N0}", ViewBag.Money ?? 0)) VNĐ</span></div>
         </div>
     </div>
 
     <div class="main-game-layout">
-        
         <div class="game-content">
-            <div style="text-align:center; color:#00ffcc; margin-bottom:10px; font-weight:700; text-transform:uppercase; letter-spacing: 2px;">
+            <div style="text-align:center; color:#00ffcc; margin-bottom:10px; font-weight:700; text-transform:uppercase;">
                 Lĩnh vực: <span style="color:#ffcc00">@ViewBag.Category</span>
             </div>
 
             <div class="lifelines">
-                <button class="lifeline-btn @(ViewBag.Used5050 ? "used" : "")" title="50/50" id="btn5050">
-                    <i class="fas fa-star-half-alt"></i>
-                </button>
-                <button class="lifeline-btn @(ViewBag.UsedCall ? "used" : "")" title="Gọi điện thoại" id="btnCall">
-                    <i class="fas fa-phone-alt"></i>
-                </button>
-                <button class="lifeline-btn @(ViewBag.UsedAudience ? "used" : "")" title="Hỏi ý kiến khán giả" id="btnAudience">
-                    <i class="fas fa-users"></i>
-                </button>
-                
-                <button class="lifeline-btn" title="Xem gợi ý" id="btnShowHint" style="border-color: #00ffcc; color: #00ffcc;">
-                    <i class="fas fa-lightbulb"></i>
-                </button>
+                <button class="lifeline-btn @(ViewBag.Used5050 ? "used" : "")" id="btn5050"><i class="fas fa-star-half-alt"></i></button>
+                <button class="lifeline-btn @(ViewBag.UsedCall ? "used" : "")" id="btnCall"><i class="fas fa-phone-alt"></i></button>
+                <button class="lifeline-btn @(ViewBag.UsedAudience ? "used" : "")" id="btnAudience"><i class="fas fa-users"></i></button>
+                <button class="lifeline-btn" id="btnShowHint" style="border-color: #00ffcc; color: #00ffcc;"><i class="fas fa-lightbulb"></i></button>
             </div>
 
             <div class="question-box">
@@ -172,14 +154,14 @@
 
             <form method="post" action="/Game/CheckAnswer" id="answerForm">
                 <input type="hidden" name="questionId" value="@Model.Id" />
+                <input type="hidden" name="answer" id="hiddenAnswerField" />
                 <input type="hidden" name="timeUsed" id="timeUsed" value="0" />
-                <input type="hidden" id="correctAnswer" value="@Model.CorrectAnswer" />
 
                 <div class="answers-grid">
-                    <button type="button" class="answer-btn" value="A"><span class="letter">A:</span> @Model.A</button>
-                    <button type="button" class="answer-btn" value="B"><span class="letter">B:</span> @Model.B</button>
-                    <button type="button" class="answer-btn" value="C"><span class="letter">C:</span> @Model.C</button>
-                    <button type="button" class="answer-btn" value="D"><span class="letter">D:</span> @Model.D</button>
+                    <button type="button" class="btn-dapan" onclick="confirmChoice('A')"><span class="letter">A:</span> @Model.A</button>
+                    <button type="button" class="btn-dapan" onclick="confirmChoice('B')"><span class="letter">B:</span> @Model.B</button>
+                    <button type="button" class="btn-dapan" onclick="confirmChoice('C')"><span class="letter">C:</span> @Model.C</button>
+                    <button type="button" class="btn-dapan" onclick="confirmChoice('D')"><span class="letter">D:</span> @Model.D</button>
                 </div>
             </form>
         </div>
@@ -189,9 +171,9 @@
             {
                 bool isMilestone = (i == 5 || i == 10 || i == 15);
                 string cssClass = "ladder-item ";
-                if (i == currentLevel) { cssClass += "active"; } 
-                else if (i < currentLevel) { cssClass += "passed"; } 
-                else if (isMilestone) { cssClass += "milestone"; } 
+                if (i == currentLevel) { cssClass += "active"; }
+                else if (i < currentLevel) { cssClass += "passed"; }
+                else if (isMilestone) { cssClass += "milestone"; }
                 else { cssClass += "normal"; }
 
                 <div class="@cssClass">
@@ -206,8 +188,51 @@
     <script src="~/js/game.js" asp-append-version="true"></script>
 
     <script>
+        // HÀM XÁC NHẬN "CHỐT ĐÁP ÁN"
+        function confirmChoice(choice) {
+            Swal.fire({
+                title: 'BẠN CÓ CHẮC CHẮN?',
+                text: "Đáp án " + choice + " là câu trả lời cuối cùng của bạn?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ffcc00',
+                cancelButtonColor: '#ff4d4d',
+                confirmButtonText: '<span style="color:black; font-weight:700">CHỐT ĐÁP ÁN!</span>',
+                cancelButtonText: 'ĐỂ TÔI NGHĨ LẠI',
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff',
+                allowOutsideClick: false // Ngăn việc lỡ tay bấm ra ngoài
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Xử lý lấy thời gian thực tế
+                    let timerEl = document.getElementById('timer');
+                    if (timerEl) {
+                        let timeLeft = parseInt(timerEl.innerText);
+                        if (!isNaN(timeLeft)) {
+                            document.getElementById('timeUsed').value = 60 - timeLeft;
+                        }
+                    }
+
+                    document.getElementById('hiddenAnswerField').value = choice;
+                    document.getElementById('answerForm').submit();
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // Hiện thông báo tiếp tục suy nghĩ và KHÔNG submit
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        title: 'Tiếp tục suy nghĩ...',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        background: 'rgba(6, 15, 30, 0.9)',
+                        color: '#00d4ff'
+                    });
+                }
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            // Logic xử lý Gợi ý (Hint)
+            // Logic Gợi ý
             document.getElementById('btnShowHint').addEventListener('click', function() {
                 Swal.fire({
                     title: 'GỢI Ý TỪ CHƯƠNG TRÌNH',
@@ -215,37 +240,26 @@
                     icon: 'info',
                     background: 'rgba(6, 15, 30, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#00d4ff',
-                    confirmButtonText: 'Đã hiểu!'
+                    confirmButtonColor: '#00d4ff'
                 });
             });
 
-            // Giữ nguyên logic nhạc nền cũ của bạn
+            // Logic Nhạc nền
             const bgMusic = document.getElementById("bgMusic");
             const btnToggleSound = document.getElementById("btnToggleSound");
             const iconSound = btnToggleSound.querySelector("i");
             let isMusicPlaying = false;
 
             function playMusic() {
-                bgMusic.volume = 0.4; 
-                bgMusic.play().then(() => {
-                    isMusicPlaying = true;
-                    iconSound.className = "fas fa-volume-up";
-                }).catch(err => console.log("Blocked autoplay"));
+                bgMusic.volume = 0.4; bgMusic.play().then(() => {
+                    isMusicPlaying = true; iconSound.className = "fas fa-volume-up";
+                }).catch(e => console.log("Autoplay blocked"));
             }
-
-            document.body.addEventListener('click', function() {
-                if (!isMusicPlaying && bgMusic.paused) playMusic();
-            }, { once: true });
-
-            btnToggleSound.addEventListener("click", function(e) {
-                e.stopPropagation(); 
+            document.body.addEventListener('click', () => { if (!isMusicPlaying) playMusic(); }, { once: true });
+            btnToggleSound.addEventListener("click", (e) => {
+                e.stopPropagation();
                 if (bgMusic.paused) playMusic();
-                else {
-                    bgMusic.pause();
-                    isMusicPlaying = false;
-                    iconSound.className = "fas fa-volume-mute";
-                }
+                else { bgMusic.pause(); isMusicPlaying = false; iconSound.className = "fas fa-volume-mute"; }
             });
         });
     </script>

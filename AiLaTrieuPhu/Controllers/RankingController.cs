@@ -24,11 +24,23 @@ namespace AiLaTrieuPhu.Controllers
 
         public IActionResult Index()
         {
-            // BẢNG 1: Điểm cao nhất & Thời gian nhanh nhất (Lấy từ bảng Rankings)
+            // BẢNG 1: Điểm cao nhất & Thời gian nhanh nhất (Mỗi tài khoản chỉ lấy 1 kỷ lục tốt nhất)
             var topScores = _context.Rankings
                 .Include(r => r.User)
-                .OrderByDescending(r => r.Score)
-                .ThenBy(r => r.TimePlayed)
+                .ToList() // Lấy dữ liệu ra bộ nhớ để xử lý GroupBy tránh lỗi EF Core
+                .GroupBy(r => r.UserId)
+                .Select(group => new Ranking
+                {
+                    UserId = group.Key,
+                    User = group.First().User,
+                    // Tìm mức điểm cao nhất của người chơi này
+                    Score = group.Max(r => r.Score),
+                    // Trong số những lần đạt điểm cao nhất đó, lấy ra thời gian chơi ngắn nhất
+                    TimePlayed = group.Where(r => r.Score == group.Max(g => g.Score))
+                                      .Min(r => r.TimePlayed)
+                })
+                .OrderByDescending(r => r.Score)   // Ưu tiên xếp hạng theo Điểm giảm dần
+                .ThenBy(r => r.TimePlayed)         // Nếu bằng điểm thì xếp theo Thời gian nhanh hơn
                 .ToList();
 
             // BẢNG 2: Tổng tiền tích lũy (Tính tổng Money từ các ván chơi trong bảng Games)
