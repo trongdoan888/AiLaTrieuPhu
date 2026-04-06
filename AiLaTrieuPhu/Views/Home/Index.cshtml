@@ -251,9 +251,10 @@
                 </a>
             }
 
-            <a href="/Game/Index" class="cyber-btn btn-play">
-                <i class="fas fa-play-circle"></i> Bắt Đâu Chơi
+            <a href="javascript:void(0);" onclick="chooseGameMode()" class="cyber-btn btn-play">
+                <i class="fas fa-play-circle"></i> Bắt Đầu Chơi
             </a>
+            
             <a href="/Home/About" class="cyber-btn">
                 <i class="fas fa-info-circle"></i> Giới Thiệu Luật
             </a>
@@ -273,6 +274,29 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // ================= XỬ LÝ CHỌN CHẾ ĐỘ CHƠI =================
+        function chooseGameMode() {
+            Swal.fire({
+                title: 'CHỌN CHẾ ĐỘ CHƠI',
+                html: `
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                        <a href="/Game/ChooseCategory" style="padding: 18px; background: rgba(0, 212, 255, 0.1); border: 2px solid #00d4ff; color: #00d4ff; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 18px; transition: 0.3s; text-transform: uppercase; box-shadow: 0 0 10px rgba(0,212,255,0.2);" onmouseover="this.style.background='#00d4ff'; this.style.color='#000'; this.style.boxShadow='0 0 20px #00d4ff';" onmouseout="this.style.background='rgba(0, 212, 255, 0.1)'; this.style.color='#00d4ff'; this.style.boxShadow='0 0 10px rgba(0,212,255,0.2)';">
+                            <i class="fas fa-user-astronaut" style="margin-right: 8px;"></i> Chơi Đơn (Sinh Tồn)
+                        </a>
+                        
+                        <a href="/Game/PvPLobby" style="padding: 18px; background: rgba(255, 204, 0, 0.1); border: 2px solid #ffcc00; color: #ffcc00; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 18px; transition: 0.3s; text-transform: uppercase; box-shadow: 0 0 10px rgba(255,204,0,0.2);" onmouseover="this.style.background='#ffcc00'; this.style.color='#000'; this.style.boxShadow='0 0 20px #ffcc00';" onmouseout="this.style.background='rgba(255, 204, 0, 0.1)'; this.style.color='#ffcc00'; this.style.boxShadow='0 0 10px rgba(255,204,0,0.2)';">
+                            <i class="fas fa-bolt" style="margin-right: 8px;"></i> Đấu Trường 1vs1 (PvP)
+                        </a>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff',
+                width: '450px'
+            });
+        }
+
         // ================= XỬ LÝ ĐĂNG XUẤT =================
         document.getElementById('btnLogout').addEventListener('click', function () {
             Swal.fire({
@@ -331,7 +355,6 @@
             }).then((result) => {
                 if (result.isConfirmed && result.value) {
                     const email = result.value;
-                    // Hỏi xác nhận lần cuối như Trọng yêu cầu
                     Swal.fire({
                         title: 'XÁC NHẬN CUỐI',
                         text: `Bạn có chắc chắn muốn dùng Email: ${email} để bảo mật tài khoản không?`,
@@ -343,7 +366,6 @@
                         color: '#fff'
                     }).then((confirmFinal) => {
                         if (confirmFinal.isConfirmed) {
-                            // Gửi AJAX về server
                             const formData = new FormData();
                             formData.append('email', email);
 

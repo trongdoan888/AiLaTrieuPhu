@@ -24,6 +24,16 @@ namespace AiLaTrieuPhu.Controllers
             _context = context;
         }
 
+        // ================= CHẾ ĐỘ 1VS1 (PVP) =================
+        // ĐÂY LÀ HÀM BỊ THIẾU GÂY RA LỖI 404 - Mình đã thêm lại
+        public IActionResult PvPLobby()
+        {
+            if (HttpContext.Session.GetInt32("UserId") == null)
+                return RedirectToAction("Login", "Account");
+
+            return View();
+        }
+
         // ================= CHỌN LĨNH VỰC =================
         public IActionResult ChooseCategory()
         {
@@ -215,6 +225,13 @@ namespace AiLaTrieuPhu.Controllers
         {
             HttpContext.Session.SetString("Used_" + type, "true");
             return Ok();
+        }
+
+        public IActionResult PvPPlaying(string roomId)
+        {
+            // Kiểm tra đăng nhập
+            if (HttpContext.Session.GetInt32("UserId") == null) return RedirectToAction("Login", "Account");
+            return View();
         }
     }
 }
