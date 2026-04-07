@@ -2,7 +2,6 @@
 @{
     Layout = null;    
     int currentLevel = ViewBag.CurrentLevel ?? 1;
-    // 1. NÂNG CẤP THANG TIỀN LỚN (Đơn vị: VNĐ)
     long[] moneyLadder = { 
         1000000, 2000000, 3000000, 5000000, 10000000, 
         20000000, 35000000, 60000000, 100000000, 250000000, 
@@ -66,7 +65,6 @@
         
         .game-content { flex: 1; max-width: 900px; display: flex; flex-direction: column; justify-content: flex-end; }
 
-        /* --- 2. THANG TIỀN VÀ MÀU SẮC MỐC 5-10-15 --- */
         .money-ladder-container {
             width: 320px; background: rgba(6, 15, 30, 0.6); backdrop-filter: blur(12px);
             border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 20px; padding: 25px;
@@ -79,7 +77,6 @@
             padding: 8px 15px; border-radius: 8px; font-weight: 600; font-size: 18px; transition: 0.3s;
         }
 
-        /* Mốc quan trọng 5, 10, 15: Màu trắng rực rỡ và bóng vàng */
         .ladder-item.milestone {
             color: #ffffff;
             text-shadow: 0 0 8px #ffcc00, 0 0 15px #ffcc00;
@@ -90,7 +87,6 @@
         .ladder-item.passed { color: #00ffcc; opacity: 0.5; }
         .ladder-item.normal { color: #00d4ff; }
 
-        /* --- CÂU HỎI VÀ ĐÁP ÁN --- */
         .question-box {
             background: rgba(6, 15, 30, 0.7); backdrop-filter: blur(12px);
             border: 2px solid rgba(0, 212, 255, 0.5); border-radius: 20px; padding: 30px 40px;
@@ -99,7 +95,6 @@
         
         .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        /* ĐÃ ĐỔI TÊN CLASS THÀNH btn-dapan */
         .btn-dapan {
             background: rgba(6, 15, 30, 0.7); backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 15px; padding: 20px 30px;
@@ -107,6 +102,9 @@
         }
         .btn-dapan:hover { background: rgba(0, 212, 255, 0.1); border-color: #ffcc00; box-shadow: 0 0 25px rgba(255, 204, 0, 0.3); }
         .btn-dapan span.letter { color: #ffcc00; font-weight: 700; margin-right: 15px; font-size: 24px;}
+
+        .correct { background: #28a745 !important; border-color: #fff !important; }
+        .wrong { background: #dc3545 !important; border-color: #fff !important; }
 
         .lifelines { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
         .lifeline-btn {
@@ -125,7 +123,7 @@
 
     <div class="top-bar">
         <div style="display: flex; align-items: center;">
-            <a href="#" class="btn-quit" id="btnQuitGame"><i class="fas fa-power-off"></i> Dừng chơi</a>
+            <a href="/Game/EndGame?reason=quit" class="btn-quit" id="btnQuitGame"><i class="fas fa-power-off"></i> Dừng chơi</a>
             <button id="btnToggleSound" class="btn-sound"><i class="fas fa-volume-up"></i></button>
         </div>
         <div class="timer-box" id="timer">60</div>
@@ -152,16 +150,16 @@
                 @(Model?.Content ?? "Đang tải câu hỏi...")
             </div>
 
-            <form method="post" action="/Game/CheckAnswer" id="answerForm">
+            <form id="answerForm" onsubmit="return false;">
                 <input type="hidden" name="questionId" value="@Model.Id" />
                 <input type="hidden" name="answer" id="hiddenAnswerField" />
                 <input type="hidden" name="timeUsed" id="timeUsed" value="0" />
 
                 <div class="answers-grid">
-                    <button type="button" class="btn-dapan" onclick="confirmChoice('A')"><span class="letter">A:</span> @Model.A</button>
-                    <button type="button" class="btn-dapan" onclick="confirmChoice('B')"><span class="letter">B:</span> @Model.B</button>
-                    <button type="button" class="btn-dapan" onclick="confirmChoice('C')"><span class="letter">C:</span> @Model.C</button>
-                    <button type="button" class="btn-dapan" onclick="confirmChoice('D')"><span class="letter">D:</span> @Model.D</button>
+                    <button type="button" class="btn-dapan" id="btnA" onclick="confirmChoice('A')"><span class="letter">A:</span> @Model.A</button>
+                    <button type="button" class="btn-dapan" id="btnB" onclick="confirmChoice('B')"><span class="letter">B:</span> @Model.B</button>
+                    <button type="button" class="btn-dapan" id="btnC" onclick="confirmChoice('C')"><span class="letter">C:</span> @Model.C</button>
+                    <button type="button" class="btn-dapan" id="btnD" onclick="confirmChoice('D')"><span class="letter">D:</span> @Model.D</button>
                 </div>
             </form>
         </div>
@@ -188,7 +186,21 @@
     <script src="~/js/game.js" asp-append-version="true"></script>
 
     <script>
-        // HÀM XÁC NHẬN "CHỐT ĐÁP ÁN"
+        let timerInterval;
+
+        function startTimer() {
+            let timeLeft = 60;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    window.location.href = "/Game/EndGame?reason=timeout";
+                }
+            }, 1000);
+        }
+
+        // HÀM GỬI AJAX VÀ HIỆN HIỆU ỨNG
         function confirmChoice(choice) {
             Swal.fire({
                 title: 'BẠN CÓ CHẮC CHẮN?',
@@ -201,22 +213,105 @@
                 cancelButtonText: 'ĐỂ TÔI NGHĨ LẠI',
                 background: 'rgba(6, 15, 30, 0.95)',
                 color: '#fff',
-                allowOutsideClick: false // Ngăn việc lỡ tay bấm ra ngoài
+                allowOutsideClick: false 
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Xử lý lấy thời gian thực tế
-                    let timerEl = document.getElementById('timer');
-                    if (timerEl) {
-                        let timeLeft = parseInt(timerEl.innerText);
-                        if (!isNaN(timeLeft)) {
-                            document.getElementById('timeUsed').value = 60 - timeLeft;
-                        }
+                    
+                    clearInterval(timerInterval); 
+                    
+                    // Khóa các nút
+                    const btns = document.querySelectorAll('.btn-dapan');
+                    btns.forEach(btn => btn.disabled = true);
+
+                    // Đổi màu vàng chờ đợi
+                    let btnSelected = document.getElementById('btn' + choice);
+                    if(btnSelected) {
+                        btnSelected.style.background = "#ffcc00";
+                        btnSelected.style.color = "#000";
                     }
 
                     document.getElementById('hiddenAnswerField').value = choice;
-                    document.getElementById('answerForm').submit();
+                    
+                    // Tính thời gian
+                    let timerEl = document.getElementById('timer');
+                    let timeUsed = 0;
+                    if (timerEl) {
+                        let timeLeft = parseInt(timerEl.innerText);
+                        if (!isNaN(timeLeft)) {
+                            timeUsed = 60 - timeLeft;
+                            document.getElementById('timeUsed').value = timeUsed;
+                        }
+                    }
+
+                    const formElement = document.getElementById('answerForm');
+                    const formData = new FormData(formElement);
+
+                    // Fetch lên CheckAnswer
+                    fetch('/Game/CheckAnswer', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.isCorrect) {
+                            if(btnSelected) {
+                                btnSelected.classList.add('correct');
+                                btnSelected.style.color = "white";
+                            }
+
+                            Swal.fire({
+                                title: 'CHÍNH XÁC!',
+                                text: 'Chúc mừng bạn đã vượt qua câu hỏi này!',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false,
+                                background: 'rgba(6,15,30,0.95)',
+                                color: '#fff'
+                            }).then(() => {
+                                window.location.href = res.redirectUrl; 
+                            });
+
+                        } else {
+                            if(btnSelected) {
+                                btnSelected.classList.add('wrong');
+                                btnSelected.style.color = "white";
+                            }
+                            
+                            let btnCorrect = document.getElementById('btn' + res.correctAnswer);
+                            if(btnCorrect) {
+                                btnCorrect.classList.add('correct');
+                                btnCorrect.style.color = "white";
+                            }
+
+                            Swal.fire({
+                                title: 'RẤT TIẾC!',
+                                html: `Đáp án chính xác phải là: <br><b style="color:#00ffcc; font-size:35px;">${res.correctAnswer}</b>`,
+                                icon: 'error',
+                                timer: 3000, 
+                                showConfirmButton: false,
+                                background: 'rgba(6,15,30,0.95)',
+                                color: '#fff'
+                            }).then(() => {
+                                Swal.fire({
+                                    title: 'TRÒ CHƠI KẾT THÚC',
+                                    html: `Bạn ra về với tiền thưởng: <br><b style="color:#ffcc00; font-size:35px;">${res.finalMoney.toLocaleString('vi-VN')} VNĐ</b>`,
+                                    icon: 'info',
+                                    confirmButtonText: 'XEM BẢNG TỔNG KẾT',
+                                    allowOutsideClick: false,
+                                    background: 'rgba(6,15,30,0.95)',
+                                    color: '#fff'
+                                }).then(() => {
+                                    window.location.href = res.redirectUrl; 
+                                });
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Lỗi:", err);
+                        Swal.fire('Lỗi!', 'Mất kết nối với máy chủ.', 'error');
+                    });
+
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    // Hiện thông báo tiếp tục suy nghĩ và KHÔNG submit
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -232,7 +327,9 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            // Logic Gợi ý
+            startTimer();
+
+            // Gợi ý
             document.getElementById('btnShowHint').addEventListener('click', function() {
                 Swal.fire({
                     title: 'GỢI Ý TỪ CHƯƠNG TRÌNH',
@@ -244,7 +341,7 @@
                 });
             });
 
-            // Logic Nhạc nền
+            // Âm thanh
             const bgMusic = document.getElementById("bgMusic");
             const btnToggleSound = document.getElementById("btnToggleSound");
             const iconSound = btnToggleSound.querySelector("i");
@@ -255,7 +352,9 @@
                     isMusicPlaying = true; iconSound.className = "fas fa-volume-up";
                 }).catch(e => console.log("Autoplay blocked"));
             }
+            
             document.body.addEventListener('click', () => { if (!isMusicPlaying) playMusic(); }, { once: true });
+            
             btnToggleSound.addEventListener("click", (e) => {
                 e.stopPropagation();
                 if (bgMusic.paused) playMusic();

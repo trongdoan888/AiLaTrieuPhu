@@ -20,8 +20,9 @@
         public string CurrentCorrectAnswer { get; set; }
         public bool IsRoundFinished { get; set; }
         public int CurrentQuestionId { get; set; } = 0;
-
-        // THÊM BIẾN NÀY ĐỂ ĐẾM SỐ LƯỢNG NGƯỜI TRẢ LỜI SAI:
         public int WrongAnswersCount { get; set; } = 0;
+
+        // === THÊM BIẾN NÀY ĐỂ LƯU TIỀN CƯỢC ===
+        public long BetAmount { get; set; } = 0;
     }
 }

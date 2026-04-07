@@ -35,21 +35,28 @@
         
         <div id="divJoin">
             <button class="btn-ready" style="background:#00d4ff; margin-bottom:20px;" onclick="joinRandom()">
-                <i class="fas fa-random"></i> GHÉP NGẪU NHIÊN
+                <i class="fas fa-random"></i> GHÉP NGẪU NHIÊN (CƯỢC 100K)
             </button>
             
-            <p style="color:#a1b0c9;">HOẶC NHẬP MÃ PHÒNG RIÊNG</p>
-            <input type="text" id="roomIdInput" class="input-room" placeholder="MÃ PIN (6 SỐ)" />
-            <div style="display: flex; gap: 10px;">
+            <p style="color:#a1b0c9; margin-bottom: 5px;">VÀO PHÒNG CỦA BẠN BÈ</p>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="roomIdInput" class="input-room" placeholder="MÃ PIN (6 SỐ)" style="flex:2" />
                 <button class="btn-ready" style="flex:1" onclick="joinPrivate()">VÀO PHÒNG</button>
+            </div>
+
+            <p style="color:#a1b0c9; margin-bottom: 5px; border-top: 1px solid #333; padding-top: 15px;">TẠO PHÒNG MỚI</p>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="betInput" class="input-room" placeholder="TIỀN CƯỢC" value="100000" step="50000" min="10000" style="flex:2" />
                 <button class="btn-ready" style="flex:1; background:#ffcc00" onclick="createPrivate()">TẠO MỚI</button>
             </div>
+            
             <a href="/Home/Index" style="display:block; margin-top:20px; color:#aaa; text-decoration:none;">Quay lại trang chủ</a>
         </div>
 
         <div id="divWaiting" style="display:none;">
             <div style="background:rgba(0,212,255,0.1); padding:10px; border-radius:10px; margin-bottom:20px;">
-                MÃ PHÒNG: <b id="displayRoomId" style="color:#ffcc00; font-size:24px;">------</b>
+                MÃ PHÒNG: <b id="displayRoomId" style="color:#ffcc00; font-size:24px;">------</b><br>
+                MỨC CƯỢC: <b id="displayBet" style="color:#ff4d4d; font-size:22px;">0 VNĐ</b>
             </div>
 
             <div class="vs-container">
@@ -90,7 +97,11 @@
         }
 
         function createPrivate() {
-            connection.invoke("CreatePrivateRoom", myName);
+            // Đọc tiền cược từ ô input
+            let bet = parseInt(document.getElementById('betInput').value);
+            if (isNaN(bet) || bet < 0) bet = 0;
+            
+            connection.invoke("CreatePrivateRoom", myName, bet);
         }
 
         function joinPrivate() {
@@ -101,7 +112,6 @@
 
         function sendReady() {
             if (!currentRoomId || currentRoomId === "") {
-                // Phòng ngừa lỗi nếu ID vẫn chưa được đồng bộ
                 currentRoomId = document.getElementById('displayRoomId').innerText;
             }
             
@@ -112,24 +122,34 @@
             connection.invoke("SetReady", currentRoomId);
         }
 
-        // --- LẮNG NGHE SỰ KIỆN ---
-        connection.on("RoomCreated", (id) => {
+        // --- LẮNG NGHE SỰ KIỆN TỪ SERVER ---
+        
+        // Hứng thêm tham số betAmount
+        connection.on("RoomCreated", (id, betAmount) => {
             currentRoomId = id;
             document.getElementById('divJoin').style.display = 'none';
             document.getElementById('divWaiting').style.display = 'block';
             document.getElementById('displayRoomId').innerText = id;
+            
+            if (betAmount !== undefined) {
+                document.getElementById('displayBet').innerText = betAmount.toLocaleString() + " VNĐ";
+            }
+            
             document.getElementById('nameP1').innerText = myName;
         });
 
-        // ĐÃ SỬA: Thêm tham số thứ 3 roomIdFromServer
-        connection.on("UpdateRoomStatus", (p1, p2, roomIdFromServer) => {
+        // Hứng thêm tham số betAmount
+        connection.on("UpdateRoomStatus", (p1, p2, roomIdFromServer, betAmount) => {
             document.getElementById('divJoin').style.display = 'none';
             document.getElementById('divWaiting').style.display = 'block';
             
-            // Cập nhật ID phòng cho cả 2 máy
             if (roomIdFromServer) {
                 currentRoomId = roomIdFromServer;
                 document.getElementById('displayRoomId').innerText = roomIdFromServer;
+            }
+            
+            if (betAmount !== undefined) {
+                document.getElementById('displayBet').innerText = betAmount.toLocaleString() + " VNĐ";
             }
 
             document.getElementById('nameP1').innerText = p1;

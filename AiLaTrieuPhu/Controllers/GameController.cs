@@ -25,7 +25,6 @@ namespace AiLaTrieuPhu.Controllers
         }
 
         // ================= CHẾ ĐỘ 1VS1 (PVP) =================
-        // ĐÂY LÀ HÀM BỊ THIẾU GÂY RA LỖI 404 - Mình đã thêm lại
         public IActionResult PvPLobby()
         {
             if (HttpContext.Session.GetInt32("UserId") == null)
@@ -69,8 +68,6 @@ namespace AiLaTrieuPhu.Controllers
             {
                 HttpContext.Session.SetInt32("Score", 0);
                 HttpContext.Session.SetInt32("TotalTime", 0);
-
-                // Lưu tiền dạng String để tránh lỗi tràn số (Overflow)
                 HttpContext.Session.SetString("Money", "0");
 
                 HttpContext.Session.Remove("Used_5050");
@@ -88,7 +85,6 @@ namespace AiLaTrieuPhu.Controllers
                 return RedirectToAction("EndGame", new { reason = "win" });
             }
 
-            // Đọc tiền từ Session
             long currentMoney = 0;
             long.TryParse(HttpContext.Session.GetString("Money"), out currentMoney);
 
@@ -104,14 +100,15 @@ namespace AiLaTrieuPhu.Controllers
             return View(question);
         }
 
+        // ================= KIỂM TRA ĐÁP ÁN (TRẢ VỀ JSON) =================
         [HttpPost]
         public IActionResult CheckAnswer(int questionId, string answer, int timeUsed)
         {
             if (HttpContext.Session.GetInt32("UserId") == null)
-                return RedirectToAction("Login", "Account");
+                return Json(new { success = false, message = "Chưa đăng nhập" });
 
             var question = _context.Questions.FirstOrDefault(q => q.Id == questionId);
-            if (question == null) return RedirectToAction("Index", "Home");
+            if (question == null) return Json(new { success = false, message = "Không tìm thấy câu hỏi" });
 
             int totalTime = (HttpContext.Session.GetInt32("TotalTime") ?? 0) + timeUsed;
             HttpContext.Session.SetInt32("TotalTime", totalTime);
@@ -122,29 +119,42 @@ namespace AiLaTrieuPhu.Controllers
 
             if (dbAnswer == userAnswer)
             {
+                // TRẢ LỜI ĐÚNG
                 int score = (HttpContext.Session.GetInt32("Score") ?? 0) + 200;
-
-                // ĐÃ SỬA: Lấy đúng số tiền từ mảng moneyLadder
                 long currentReward = moneyLadder[currentLevel - 1];
-
                 currentLevel++;
-
-                if (currentLevel > 15)
-                {
-                    HttpContext.Session.SetInt32("Score", score);
-                    HttpContext.Session.SetString("Money", currentReward.ToString());
-                    return RedirectToAction("EndGame", new { reason = "win" });
-                }
 
                 HttpContext.Session.SetInt32("CurrentLevel", currentLevel);
                 HttpContext.Session.SetInt32("Score", score);
-                HttpContext.Session.SetString("Money", currentReward.ToString()); // Lưu tiền mới
+                HttpContext.Session.SetString("Money", currentReward.ToString());
 
-                return RedirectToAction("ChooseCategory");
+                bool isWin = currentLevel > 15;
+
+                return Json(new
+                {
+                    success = true,
+                    isCorrect = true,
+                    isWin = isWin,
+                    message = "Chính xác!",
+                    redirectUrl = isWin ? "/Game/EndGame?reason=win" : "/Game/ChooseCategory"
+                });
             }
             else
             {
-                return RedirectToAction("EndGame", new { reason = "lose" });
+                // TRẢ LỜI SAI
+                long finalMoney = 0;
+                if (currentLevel > 10) finalMoney = moneyLadder[9];
+                else if (currentLevel > 5) finalMoney = moneyLadder[4];
+                else finalMoney = 0;
+
+                return Json(new
+                {
+                    success = true,
+                    isCorrect = false,
+                    correctAnswer = dbAnswer,
+                    finalMoney = finalMoney,
+                    redirectUrl = "/Game/EndGame?reason=lose"
+                });
             }
         }
 
@@ -157,18 +167,16 @@ namespace AiLaTrieuPhu.Controllers
             int levelReached = (HttpContext.Session.GetInt32("CurrentLevel") ?? 1);
             int totalTime = HttpContext.Session.GetInt32("TotalTime") ?? 0;
 
-            // Đọc tiền từ Session
             long money = 0;
             long.TryParse(HttpContext.Session.GetString("Money"), out money);
 
             if (reason == "timeout") totalTime += 60;
 
-            // ĐÃ SỬA: Tính toán rớt mốc dựa trên mảng moneyLadder (Mốc 5 là index 4, Mốc 10 là index 9)
             if (reason == "lose" || reason == "timeout")
             {
-                if (levelReached > 10) money = moneyLadder[9]; // Rớt về mốc 10 (250 triệu)
-                else if (levelReached > 5) money = moneyLadder[4]; // Rớt về mốc 5 (10 triệu)
-                else money = 0; // Trắng tay
+                if (levelReached > 10) money = moneyLadder[9];
+                else if (levelReached > 5) money = moneyLadder[4];
+                else money = 0;
             }
 
             try
@@ -203,7 +211,6 @@ namespace AiLaTrieuPhu.Controllers
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); }
 
-            // Xóa Session
             HttpContext.Session.Remove("CurrentLevel");
             HttpContext.Session.Remove("Score");
             HttpContext.Session.Remove("TotalTime");
@@ -229,7 +236,6 @@ namespace AiLaTrieuPhu.Controllers
 
         public IActionResult PvPPlaying(string roomId)
         {
-            // Kiểm tra đăng nhập
             if (HttpContext.Session.GetInt32("UserId") == null) return RedirectToAction("Login", "Account");
             return View();
         }
