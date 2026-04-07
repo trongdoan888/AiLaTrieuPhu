@@ -1,5 +1,4 @@
-﻿@* Giữ nguyên phần Header và Style của bạn, chỉ thay đổi phần Script bên dưới *@
-@{ Layout = null; }
+﻿@{ Layout = null; }
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,43 +7,57 @@
     <title>Đấu Trường 1vs1 - Ai Là Triệu Phú</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        @* Giữ nguyên CSS cũ của bạn ở đây *@
         @@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
         body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Rajdhani', sans-serif; background-color: #030712; background-image: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 80%), linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px); background-size: 100% 100%, 30px 30px, 30px 30px; color: white; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* HEADER */
         .pvp-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: rgba(6, 15, 30, 0.8); border-bottom: 2px solid #00d4ff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 10; }
-        .player-card { display: flex; flex-direction: column; align-items: center; padding: 10px 30px; border-radius: 15px; min-width: 200px; background: rgba(0,0,0,0.5); border: 2px solid; }
+        .player-card { display: flex; flex-direction: column; align-items: center; padding: 10px 30px; border-radius: 15px; min-width: 200px; background: rgba(0,0,0,0.5); border: 2px solid; transition: 0.3s; }
         .p1-card { border-color: #00d4ff; box-shadow: 0 0 15px rgba(0,212,255,0.3); }
         .p1-card .p-name { color: #00d4ff; font-size: 24px; text-transform: uppercase; }
         .p2-card { border-color: #ff4d4d; box-shadow: 0 0 15px rgba(255,77,77,0.3); }
         .p2-card .p-name { color: #ff4d4d; font-size: 24px; text-transform: uppercase; }
         .p-score { font-size: 20px; color: #ffcc00; font-weight: 700; margin-top: 5px; }
         .timer-box { width: 80px; height: 80px; background: radial-gradient(circle, #ffcc00, #b38f00); border: 3px solid #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; font-weight: bold; color: black; box-shadow: 0 0 20px #ffcc00; }
+
+        /* BATTLE ARENA */
         .battle-arena { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; max-width: 1000px; margin: 0 auto; width: 100%; }
-        .question-box { background: rgba(6, 15, 30, 0.85); backdrop-filter: blur(12px); border: 2px solid #00d4ff; border-radius: 20px; padding: 40px; text-align: center; font-size: 30px; font-weight: 700; margin-bottom: 40px; width: 100%; box-shadow: 0 0 30px rgba(0,212,255,0.2); min-height: 150px; display: flex; align-items: center; justify-content: center; }
-        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; }
-        .btn-dapan { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(0, 212, 255, 0.4); border-radius: 15px; padding: 25px; color: white; font-size: 24px; text-align: left; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; font-family: 'Rajdhani', sans-serif; font-weight: 600; }
-        .btn-dapan:hover:not(:disabled) { background: rgba(0, 212, 255, 0.2); border-color: #ffcc00; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); transform: scale(1.02); }
-        .btn-dapan:disabled { cursor: not-allowed; opacity: 0.8; }
-        .btn-dapan .letter { color: #ffcc00; font-weight: 700; margin-right: 15px; font-size: 26px; }
+        .question-box { background: rgba(6, 15, 30, 0.85); backdrop-filter: blur(12px); border: 2px solid #00d4ff; border-radius: 20px; padding: 40px; text-align: center; font-size: 30px; font-weight: 700; margin-bottom: 30px; width: 100%; box-shadow: 0 0 30px rgba(0,212,255,0.2); min-height: 120px; display: flex; align-items: center; justify-content: center; position: relative; }
+        
+        /* TRỢ GIÚP */
+        .lifelines-pvp { display: flex; gap: 20px; margin-bottom: 20px; }
+        .btn-lifeline { background: rgba(255, 255, 255, 0.1); border: 1px solid #00d4ff; color: #00d4ff; padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .btn-lifeline:hover:not(:disabled) { background: #00d4ff; color: black; box-shadow: 0 0 15px #00d4ff; }
+        .btn-lifeline:disabled { opacity: 0.3; border-color: #555; color: #555; cursor: not-allowed; }
+
+        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+        .btn-dapan { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 212, 255, 0.4); border-radius: 15px; padding: 20px; color: white; font-size: 22px; text-align: left; cursor: pointer; transition: 0.2s; font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+        .btn-dapan:hover:not(:disabled) { background: rgba(0, 212, 255, 0.2); border-color: #ffcc00; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); }
+        .btn-dapan:disabled { opacity: 0.8; cursor: not-allowed; }
+        
+        /* FEEDBACK MÀU */
+        .correct { background: #28a745 !important; border-color: #fff !important; color: white !important;}
+        .wrong { background: #dc3545 !important; border-color: #fff !important; }
+        .hidden-ans { visibility: hidden; opacity: 0; transition: 0.3s; }
+
         #syncOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .sync-text { color: #00ffcc; font-size: 24px; margin-top: 20px; letter-spacing: 2px; }
         
-        /* Class màu cho kết quả */
-        .correct { background: #28a745 !important; border-color: #fff !important; color: white !important; }
-        .wrong { background: #dc3545 !important; border-color: #fff !important; opacity: 0.6; }
+        .shake { animation: shake 0.5s; }
+        @@keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 100% { transform: translate(1px, 1px) rotate(0deg); } }
     </style>
 </head>
 <body>
 
     <div id="syncOverlay">
         <i class="fas fa-satellite-dish fa-spin" style="font-size: 60px; color: #00d4ff;"></i>
-        <div class="sync-text">ĐANG ĐỒNG BỘ DỮ LIỆU...</div>
+        <div class="sync-text">ĐANG ĐỒNG BỘ DỮ LIỆU ĐẤU TRƯỜNG...</div>
     </div>
 
     <div class="pvp-header">
-        <div class="player-card p1-card">
+        <div class="player-card p1-card" id="cardP1">
             <span class="p-name">@Context.Session.GetString("Username")</span>
-            <span class="p-score" id="myScore">0 VNĐ</span>
+            <span class="p-score" id="myScore">0 ĐIỂM</span>
         </div>
         
         <div class="timer-wrapper">
@@ -52,21 +65,26 @@
             <div class="timer-box" id="timer">60</div>
         </div>
 
-        <div class="player-card p2-card">
+        <div class="player-card p2-card" id="cardP2">
             <span class="p-name" id="opponentName">Đang chờ...</span>
-            <span class="p-score" id="opponentScore">0 VNĐ</span>
+            <span class="p-score" id="opponentScore">0 ĐIỂM</span>
         </div>
     </div>
 
     <div class="battle-arena">
+        <div class="lifelines-pvp">
+            <button class="btn-lifeline" id="btn5050" onclick="useLifeline('5050')"><i class="fas fa-star-half-alt"></i> 50/50</button>
+            <button class="btn-lifeline" id="btnHint" onclick="useLifeline('Hint')"><i class="fas fa-lightbulb"></i> GỢI Ý</button>
+        </div>
+
         <div style="color: #ffcc00; font-size: 24px; font-weight: bold; margin-bottom: 10px;" id="questionLevel">CÂU SỐ 1</div>
-        <div class="question-box" id="questionContent">Đang chờ câu hỏi từ máy chủ...</div>
+        <div class="question-box" id="questionContent">Đang tải câu hỏi...</div>
 
         <div class="answers-grid">
-            <button class="btn-dapan" id="btnA" onclick="sendAnswer('A')" disabled><span class="letter">A:</span> <span id="ansA">...</span></button>
-            <button class="btn-dapan" id="btnB" onclick="sendAnswer('B')" disabled><span class="letter">B:</span> <span id="ansB">...</span></button>
-            <button class="btn-dapan" id="btnC" onclick="sendAnswer('C')" disabled><span class="letter">C:</span> <span id="ansC">...</span></button>
-            <button class="btn-dapan" id="btnD" onclick="sendAnswer('D')" disabled><span class="letter">D:</span> <span id="ansD">...</span></button>
+            <button class="btn-dapan" id="btnA" onclick="sendAnswer('A')" disabled><span style="color:#ffcc00">A:</span> <span id="ansA">...</span></button>
+            <button class="btn-dapan" id="btnB" onclick="sendAnswer('B')" disabled><span style="color:#ffcc00">B:</span> <span id="ansB">...</span></button>
+            <button class="btn-dapan" id="btnC" onclick="sendAnswer('C')" disabled><span style="color:#ffcc00">C:</span> <span id="ansC">...</span></button>
+            <button class="btn-dapan" id="btnD" onclick="sendAnswer('D')" disabled><span style="color:#ffcc00">D:</span> <span id="ansD">...</span></button>
         </div>
     </div>
 
@@ -87,102 +105,116 @@
             .withAutomaticReconnect()
             .build();
 
-        // 1. Khởi tạo kết nối
         connection.start().then(() => {
-            console.log("SignalR Connected.");
             connection.invoke("PlayerReadyForBattle", roomId, myName);
-        }).catch(err => console.error(err));
-
-        // 2. Khi đối thủ đã vào và sẵn sàng
-        connection.on("BattleStarted", (opponentName) => {
-            document.getElementById('opponentName').innerText = opponentName;
-            document.getElementById('syncOverlay').style.fadeOut = "slow"; // Hiệu ứng ẩn nhẹ
-            setTimeout(() => { document.getElementById('syncOverlay').style.display = 'none'; }, 500);
         });
 
-        // 3. Nhận câu hỏi và bắt đầu đếm ngược
-        connection.on("ReceiveQuestion", (level, content, a, b, c, d) => {
-            // Reset giao diện nút
-            const btns = document.querySelectorAll('.btn-dapan');
-            btns.forEach(btn => {
-                btn.disabled = false;
-                btn.className = "btn-dapan"; 
-                btn.style.background = "";
-                btn.style.color = "";
-            });
+        connection.on("BattleStarted", (opponentName) => {
+            document.getElementById('opponentName').innerText = opponentName;
+            document.getElementById('syncOverlay').style.display = 'none'; 
+        });
 
+        // KHI NHẬN CÂU HỎI TỪ SERVER
+        connection.on("ReceiveQuestion", (level, content, a, b, c, d) => {
+            resetUI();
             document.getElementById('questionLevel').innerText = "CÂU SỐ " + level;
             document.getElementById('questionContent').innerText = content;
             document.getElementById('ansA').innerText = a;
             document.getElementById('ansB').innerText = b;
             document.getElementById('ansC').innerText = c;
             document.getElementById('ansD').innerText = d;
-
             startTimer();
         });
+
+        function resetUI() {
+            const btns = document.querySelectorAll('.btn-dapan');
+            btns.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct', 'wrong', 'hidden-ans');
+                btn.style.background = "";
+                btn.style.color = "white";
+            });
+        }
 
         function startTimer() {
             clearInterval(timerInterval);
             timeLeft = 60;
-            document.getElementById('timer').innerText = timeLeft;
             timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                if (timeLeft <= 10) document.getElementById('timer').style.color = "red";
-                else document.getElementById('timer').style.color = "black";
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    // Tự động báo hết giờ lên server nếu cần
-                }
+                if (timeLeft <= 0) clearInterval(timerInterval);
             }, 1000);
         }
 
         function sendAnswer(answer) {
-            clearInterval(timerInterval); // Dừng đếm ngược khi đã chọn
+            // Khóa CHẾT tất cả các nút khi vừa bấm, 1 câu chỉ được trả lời 1 lần!
             const btns = document.querySelectorAll('.btn-dapan');
             btns.forEach(btn => btn.disabled = true);
-            
-            document.getElementById('btn' + answer).style.background = "#ffcc00"; // Đang chờ xác nhận
+            document.getElementById('btn' + answer).style.background = "#ffcc00";
             document.getElementById('btn' + answer).style.color = "#000";
-
             connection.invoke("SubmitPvPAnswer", roomId, myName, answer);
         }
 
-        // 4. Xử lý kết quả vòng đấu
-        connection.on("RoundResult", (winnerName, isCorrect, correctAnswer, myNewMoney, opponentNewMoney) => {
-            clearInterval(timerInterval);
-            
-            // Hiển thị đáp án đúng/sai bằng màu sắc
-            const correctBtn = document.getElementById('btn' + correctAnswer);
-            const btns = document.querySelectorAll('.btn-dapan');
-            
-            btns.forEach(btn => {
-                if (btn.id === 'btn' + correctAnswer) btn.classList.add('correct');
-                else btn.classList.add('wrong');
-            });
+        function useLifeline(type) {
+            document.getElementById('btn' + type).disabled = true;
+            connection.invoke("UseLifelinePvP", roomId, type);
+        }
 
-            // Cập nhật tiền (Dùng N0 để format giống 2 Tỷ của Trọng)
-            document.getElementById('myScore').innerText = Number(myNewMoney).toLocaleString() + " VNĐ";
-            document.getElementById('opponentScore').innerText = Number(opponentNewMoney).toLocaleString() + " VNĐ";
-
-            let title = "";
-            let icon = "";
-            if (winnerName === myName && isCorrect) {
-                title = "XUẤT SẮC!";
-                icon = "success";
-            } else if (winnerName !== "None" && winnerName !== myName) {
-                title = "ĐỐI THỦ NHANH HƠN!";
-                icon = "error";
-            } else {
-                title = "TIẾC QUÁ!";
-                icon = "warning";
+        // XỬ LÝ TRỢ GIÚP CÁ NHÂN TỪ SERVER
+        connection.on("ApplyLifeline", (type, correctAnswer) => {
+            if(type === '5050') {
+                let options = ['A', 'B', 'C', 'D'];
+                options = options.filter(o => o !== correctAnswer); 
+                options.sort(() => Math.random() - 0.5); 
+                
+                document.getElementById('btn' + options[0]).classList.add('hidden-ans');
+                document.getElementById('btn' + options[1]).classList.add('hidden-ans');
+                
+                Swal.fire({ title: '50/50', text: 'Hệ thống đã loại bỏ 2 phương án sai!', icon: 'info', timer: 1500, showConfirmButton: false });
+            } else if (type === 'Hint') {
+                Swal.fire({ title: 'GỢI Ý TỪ CHUYÊN GIA', text: `Đáp án có thể là ${correctAnswer} đấy!`, icon: 'info' });
             }
+        });
+
+        // ------------------ ĐỒNG BỘ ĐIỂM SỐ ------------------
+        // Hàm này bắt buộc điểm trên 2 cột hiển thị CHÍNH XÁC theo thông số gửi từ Server
+        function updateScoresUI(p1Name, p1Score, p2Name, p2Score) {
+            if (myName === p1Name) {
+                document.getElementById('myScore').innerText = p1Score.toLocaleString() + " ĐIỂM";
+                document.getElementById('opponentScore').innerText = p2Score.toLocaleString() + " ĐIỂM";
+            } else {
+                document.getElementById('myScore').innerText = p2Score.toLocaleString() + " ĐIỂM";
+                document.getElementById('opponentScore').innerText = p1Score.toLocaleString() + " ĐIỂM";
+            }
+        }
+
+        // 1. CÓ NGƯỜI TRẢ LỜI ĐÚNG VÀ NHANH NHẤT (Vòng đã bị khóa)
+        connection.on("RoundResult", (winnerName, isCorrect, correctAnswer, p1Name, p1Score, p2Name, p2Score) => {
+            clearInterval(timerInterval);
+            lockAndShowCorrect(correctAnswer);
+            updateScoresUI(p1Name, p1Score, p2Name, p2Score);
 
             Swal.fire({
-                title: title,
-                text: isCorrect ? `Đáp án đúng là ${correctAnswer}` : "Cả hai đều chưa chính xác!",
-                icon: icon,
+                title: 'BẠN ĐÃ THẮNG VÒNG NÀY!',
+                text: '+1000 ĐIỂM',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                background: 'rgba(6,15,30,0.95)',
+                color: '#fff'
+            });
+        });
+
+        // 2. MÌNH CHẬM TAY HƠN (Đối thủ đã trả lời đúng trước)
+        connection.on("OpponentWonRound", (winnerName, correctAnswer, p1Name, p1Score, p2Name, p2Score) => {
+            clearInterval(timerInterval);
+            lockAndShowCorrect(correctAnswer);
+            updateScoresUI(p1Name, p1Score, p2Name, p2Score);
+
+            Swal.fire({
+                title: 'BẠN ĐÃ CHẬM CHÂN!',
+                html: `<b style="color:#ff4d4d">${winnerName}</b> đã trả lời đúng trước.<br>Bạn không nhận được điểm ở câu này!`,
+                icon: 'error',
                 timer: 3000,
                 showConfirmButton: false,
                 background: 'rgba(6,15,30,0.95)',
@@ -190,15 +222,65 @@
             });
         });
 
-        // 5. Kết thúc game
+        // 3. MÌNH TRẢ LỜI SAI (BỊ TRỪ ĐIỂM VÀ KHÓA NÚT Ở CÂU ĐÓ)
+        connection.on("WrongAnswerFeedback", (answer) => {
+            document.getElementById('btn' + answer).classList.add('wrong');
+            document.getElementById('btn' + answer).style.color = "white";
+            
+            document.querySelector('.battle-arena').classList.add('shake');
+            setTimeout(() => document.querySelector('.battle-arena').classList.remove('shake'), 500);
+            
+            Swal.fire({ title: 'SAI RỒI!', text: '-1000 ĐIỂM', icon: 'error', timer: 1500, showConfirmButton: false });
+            // CÁC NÚT VẪN BỊ KHÓA, VÌ CHỈ ĐƯỢC CHỌN 1 LẦN.
+        });
+
+        // 4. CHỈ CẬP NHẬT ĐIỂM KHI ĐỐI THỦ TRẢ LỜI SAI 
+        connection.on("UpdateScoreOnly", (p1Name, p1Score, p2Name, p2Score) => {
+            updateScoresUI(p1Name, p1Score, p2Name, p2Score);
+        });
+
+        // 5. CẢ 2 NGƯỜI ĐỀU TRẢ LỜI SAI CÂU ĐÓ
+        connection.on("BothWrong", (correctAnswer, p1Name, p1Score, p2Name, p2Score) => {
+            clearInterval(timerInterval);
+            lockAndShowCorrect(correctAnswer);
+            updateScoresUI(p1Name, p1Score, p2Name, p2Score);
+
+            Swal.fire({ 
+                title: 'CẢ 2 ĐỀU SAI!', 
+                text: `Đáp án đúng là ${correctAnswer}. Chuyển câu hỏi...`, 
+                icon: 'warning', 
+                timer: 3000, 
+                showConfirmButton: false, 
+                background: 'rgba(6,15,30,0.95)', 
+                color: '#fff' 
+            });
+        });
+
+        // HÀM HỖ TRỢ GIAO DIỆN
+        function lockAndShowCorrect(correctAnswer) {
+            const btns = document.querySelectorAll('.btn-dapan');
+            btns.forEach(btn => {
+                btn.disabled = true;
+                if (btn.id === 'btn' + correctAnswer) {
+                    btn.classList.add('correct');
+                    btn.style.color = "white";
+                } else {
+                    btn.classList.add('wrong');
+                }
+            });
+        }
+
+        // KẾT THÚC GAME
         connection.on("GameOver", (winner) => {
+            clearInterval(timerInterval);
             Swal.fire({
                 title: 'TRẬN ĐẤU KẾT THÚC',
-                text: winner === myName ? "BẠN LÀ NHÀ VÔ ĐỊCH!" : "ĐỐI THỦ ĐÃ GIÀNH CHIẾN THẮNG!",
-                icon: 'info',
-                confirmButtonText: 'Về trang chủ',
+                html: `Người chiến thắng: <br><b style="color:#ffcc00; font-size:35px;">${winner}</b>`,
+                icon: 'trophy',
+                confirmButtonText: 'VỀ TRANG CHỦ',
                 background: 'rgba(6,15,30,0.95)',
-                color: '#fff'
+                color: '#fff',
+                allowOutsideClick: false
             }).then(() => { window.location.href = "/Home/Index"; });
         });
     </script>
