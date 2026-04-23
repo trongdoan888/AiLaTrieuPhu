@@ -22,5 +22,20 @@ services:
     ports:
       - "5050:80"
 
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok_tunnel
+    restart: always
+    ports:
+      - "4040:4040"
+    environment:
+      # BẠN NHỚ THAY ĐOẠN cr...U1BgAR CỦA BẠN VÀO ĐÂY NHÉ:
+      - NGROK_AUTHTOKEN=3ClLurKek5bdVli1byYybU1BgAR_2repyfnzfCLkPSTkagasx
+    # Trỏ ngrok về cổng 5500 trên máy tính Windows của bạn
+    command: "http host.docker.internal:5500"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Dòng này đảm bảo container ngrok kết nối được ra ngoài Windows
+  
+
 volumes:
   pgdata:
