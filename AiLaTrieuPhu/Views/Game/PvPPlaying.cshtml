@@ -60,9 +60,13 @@
             <span class="p-score" id="myScore">0 ĐIỂM</span>
         </div>
         
-        <div class="timer-wrapper">
+        <div class="timer-wrapper" style="display:flex; flex-direction:column; align-items:center;">
             <div style="color: #00d4ff; margin-bottom: 5px; font-weight: bold;">ROOM: <span id="displayRoomId">---</span></div>
             <div class="timer-box" id="timer">60</div>
+            
+            <button class="btn-lifeline" style="margin-top: 15px; background: rgba(255, 77, 77, 0.2); border-color: #ff4d4d; color: #ff4d4d; width: 100%; font-size: 16px;" onclick="confirmSurrender()">
+                <i class="fas fa-flag"></i> ĐẦU HÀNG
+            </button>
         </div>
 
         <div class="player-card p2-card" id="cardP2">
@@ -177,7 +181,6 @@
         });
 
         // ------------------ ĐỒNG BỘ ĐIỂM SỐ ------------------
-        // Hàm này bắt buộc điểm trên 2 cột hiển thị CHÍNH XÁC theo thông số gửi từ Server
         function updateScoresUI(p1Name, p1Score, p2Name, p2Score) {
             if (myName === p1Name) {
                 document.getElementById('myScore').innerText = p1Score.toLocaleString() + " ĐIỂM";
@@ -188,7 +191,6 @@
             }
         }
 
-        // 1. CÓ NGƯỜI TRẢ LỜI ĐÚNG VÀ NHANH NHẤT (Vòng đã bị khóa)
         connection.on("RoundResult", (winnerName, isCorrect, correctAnswer, p1Name, p1Score, p2Name, p2Score) => {
             clearInterval(timerInterval);
             lockAndShowCorrect(correctAnswer);
@@ -205,7 +207,6 @@
             });
         });
 
-        // 2. MÌNH CHẬM TAY HƠN (Đối thủ đã trả lời đúng trước)
         connection.on("OpponentWonRound", (winnerName, correctAnswer, p1Name, p1Score, p2Name, p2Score) => {
             clearInterval(timerInterval);
             lockAndShowCorrect(correctAnswer);
@@ -222,7 +223,6 @@
             });
         });
 
-        // 3. MÌNH TRẢ LỜI SAI (BỊ TRỪ ĐIỂM VÀ KHÓA NÚT Ở CÂU ĐÓ)
         connection.on("WrongAnswerFeedback", (answer) => {
             document.getElementById('btn' + answer).classList.add('wrong');
             document.getElementById('btn' + answer).style.color = "white";
@@ -231,15 +231,12 @@
             setTimeout(() => document.querySelector('.battle-arena').classList.remove('shake'), 500);
             
             Swal.fire({ title: 'SAI RỒI!', text: '-1000 ĐIỂM', icon: 'error', timer: 1500, showConfirmButton: false });
-            // CÁC NÚT VẪN BỊ KHÓA, VÌ CHỈ ĐƯỢC CHỌN 1 LẦN.
         });
 
-        // 4. CHỈ CẬP NHẬT ĐIỂM KHI ĐỐI THỦ TRẢ LỜI SAI 
         connection.on("UpdateScoreOnly", (p1Name, p1Score, p2Name, p2Score) => {
             updateScoresUI(p1Name, p1Score, p2Name, p2Score);
         });
 
-        // 5. CẢ 2 NGƯỜI ĐỀU TRẢ LỜI SAI CÂU ĐÓ
         connection.on("BothWrong", (correctAnswer, p1Name, p1Score, p2Name, p2Score) => {
             clearInterval(timerInterval);
             lockAndShowCorrect(correctAnswer);
@@ -256,7 +253,6 @@
             });
         });
 
-        // HÀM HỖ TRỢ GIAO DIỆN
         function lockAndShowCorrect(correctAnswer) {
             const btns = document.querySelectorAll('.btn-dapan');
             btns.forEach(btn => {
@@ -270,7 +266,6 @@
             });
         }
 
-        // KẾT THÚC GAME
         connection.on("GameOver", (winner) => {
             clearInterval(timerInterval);
             Swal.fire({
@@ -281,6 +276,65 @@
                 background: 'rgba(6,15,30,0.95)',
                 color: '#fff',
                 allowOutsideClick: false
+            }).then(() => { window.location.href = "/Home/Index"; });
+        });
+
+        // ================= ĐÃ THÊM: XỬ LÝ SỰ KIỆN ĐẦU HÀNG =================
+
+        // 1. Khi người chơi bấm nút Đầu hàng
+        function confirmSurrender() {
+            Swal.fire({
+                title: 'XÁC NHẬN ĐẦU HÀNG?',
+                html: "Bạn sẽ bị xử thua và mất toàn bộ số tiền cược ở trận này!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#555',
+                confirmButtonText: '<i class="fas fa-flag"></i> Chấp nhận thua',
+                cancelButtonText: 'Tiếp tục chiến đấu',
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    clearInterval(timerInterval); // Dừng đồng hồ
+                    document.getElementById('syncOverlay').style.display = 'flex'; // Hiện màn hình chờ mờ
+                    document.querySelector('.sync-text').innerText = "ĐANG XỬ LÝ ĐẦU HÀNG...";
+                    
+                    // Gửi tín hiệu đầu hàng lên Server SignalR
+                    connection.invoke("Surrender", roomId, myName);
+                }
+            });
+        }
+
+        // 2. Nhận tín hiệu: ĐỐI THỦ ĐÃ ĐẦU HÀNG (Mình là người thắng)
+        connection.on("OpponentSurrendered", (betAmount) => {
+            clearInterval(timerInterval);
+            document.getElementById('syncOverlay').style.display = 'none';
+
+            Swal.fire({
+                title: 'ĐỐI THỦ ĐÃ ĐẦU HÀNG!',
+                html: `Đối thủ đã bỏ cuộc.<br>Chúc mừng bạn nhận được tiền cược: <br><b style="color:#00ffcc; font-size: 30px;">+${betAmount.toLocaleString('vi-VN')} VNĐ</b>`,
+                icon: 'success',
+                confirmButtonText: 'TUYỆT VỜI',
+                allowOutsideClick: false,
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff'
+            }).then(() => { window.location.href = "/Home/Index"; });
+        });
+
+        // 3. Nhận tín hiệu: BẠN ĐÃ ĐẦU HÀNG (Xác nhận từ Server)
+        connection.on("SurrenderConfirmed", (betAmount) => {
+            clearInterval(timerInterval);
+            document.getElementById('syncOverlay').style.display = 'none';
+
+            Swal.fire({
+                title: 'BẠN ĐÃ ĐẦU HÀNG',
+                html: `Bạn đã chấp nhận thua cuộc ở trận đấu này.<br>Tiền cược bị trừ: <br><b style="color:#ff4d4d; font-size: 30px;">-${betAmount.toLocaleString('vi-VN')} VNĐ</b>`,
+                icon: 'error',
+                confirmButtonText: 'VỀ TRANG CHỦ',
+                allowOutsideClick: false,
+                background: 'rgba(6, 15, 30, 0.95)',
+                color: '#fff'
             }).then(() => { window.location.href = "/Home/Index"; });
         });
     </script>

@@ -267,5 +267,68 @@ namespace AiLaTrieuPhu.Hubs
                 await Clients.Caller.SendAsync("ApplyLifeline", type, room.CurrentCorrectAnswer);
             }
         }
+
+        // ================= THÊM CHỨC NĂNG ĐẦU HÀNG =================
+        public async Task Surrender(string roomId, string playerName)
+        {
+            if (Rooms.TryGetValue(roomId, out var room))
+            {
+                // Nếu round đã kết thúc (ai đó vừa trả lời đúng xong) thì không cho đầu hàng nữa để tránh lỗi logic
+                if (room.IsRoundFinished) return;
+
+                // Khóa phòng không cho tương tác nữa
+                room.IsRoundFinished = true;
+
+                // Xác định ai là người thắng, ai là người thua (người gọi hàm này)
+                string winnerName = (room.Player1Name == playerName) ? room.Player2Name : room.Player1Name;
+                string winnerConnectionId = (room.Player1Name == playerName) ? room.Player2ConnectionId : room.Player1ConnectionId;
+                string loserConnectionId = (room.Player1Name == playerName) ? room.Player1ConnectionId : room.Player2ConnectionId;
+
+                var dbWinner = _context.Users.FirstOrDefault(u => u.Username == winnerName);
+                var dbLoser = _context.Users.FirstOrDefault(u => u.Username == playerName);
+
+                if (dbWinner != null && dbLoser != null)
+                {
+                    // 1. Lịch sử: Người thắng được cộng tiền cược
+                    _context.Games.Add(new Game
+                    {
+                        UserId = dbWinner.Id,
+                        Score = (room.Player1Name == winnerName) ? room.Player1Score : room.Player2Score,
+                        LevelReached = room.CurrentLevel,
+                        TotalTime = 0,
+                        Money = room.BetAmount,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    // 2. Lịch sử: Người đầu hàng bị trừ tiền cược
+                    _context.Games.Add(new Game
+                    {
+                        UserId = dbLoser.Id,
+                        Score = (room.Player1Name == playerName) ? room.Player1Score : room.Player2Score,
+                        LevelReached = room.CurrentLevel,
+                        TotalTime = 0,
+                        Money = -room.BetAmount,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    await _context.SaveChangesAsync();
+                }
+
+                // Gửi thông báo đến trình duyệt của người Thắng
+                if (!string.IsNullOrEmpty(winnerConnectionId))
+                {
+                    await Clients.Client(winnerConnectionId).SendAsync("OpponentSurrendered", room.BetAmount);
+                }
+
+                // Gửi thông báo đến trình duyệt của người Đầu hàng
+                if (!string.IsNullOrEmpty(loserConnectionId))
+                {
+                    await Clients.Client(loserConnectionId).SendAsync("SurrenderConfirmed", room.BetAmount);
+                }
+
+                // Dọn dẹp RAM: Xóa phòng chơi này khỏi bộ nhớ sau khi kết thúc
+                Rooms.TryRemove(roomId, out _);
+            }
+        }
     }
 }
